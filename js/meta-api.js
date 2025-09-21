@@ -10,7 +10,12 @@ class MetaAdsAPI {
             this.mode = localStorage.getItem('api_mode') || 'demo'; // 'demo' or 'real'
         }
         
+        // Initialize error handler and connection monitor
+        this.errorHandler = new APIErrorHandler();
+        this.connectionMonitor = new ConnectionMonitor();
+        
         this.facebookAppId = localStorage.getItem('facebook_app_id') || '1469476877413511';
+        this.fallbackAppId = '1091093523181393'; // Fallback App ID
         this.accessToken = localStorage.getItem('facebook_access_token');
         this.accountId = localStorage.getItem('facebook_account_id');
         this.isSDKLoaded = false;
@@ -18,6 +23,12 @@ class MetaAdsAPI {
         this.user = null;
         this.connectionStatus = 'disconnected'; // 'disconnected', 'connecting', 'connected'
         this.isHttps = isHttps;
+        this.tokenExpiresAt = localStorage.getItem('facebook_token_expires') ? 
+                            parseInt(localStorage.getItem('facebook_token_expires')) : null;
+        this.rateLimitTracker = {
+            calls: 0,
+            resetTime: Date.now() + 3600000 // 1 hour
+        };
     }
 
     // Alternar modo API
@@ -45,7 +56,29 @@ class MetaAdsAPI {
 
     // Verificar se está autenticado
     isAuthenticated() {
-        return this.accessToken && this.user;
+        return this.accessToken && this.user && !this.isTokenExpired();
+    }
+
+    // Verificar se token expirou
+    isTokenExpired() {
+        if (!this.tokenExpiresAt) return false;
+        return Date.now() >= this.tokenExpiresAt;
+    }
+
+    // Rate limiting check
+    checkRateLimit() {
+        const now = Date.now();
+        if (now >= this.rateLimitTracker.resetTime) {
+            this.rateLimitTracker.calls = 0;
+            this.rateLimitTracker.resetTime = now + 3600000; // Reset for next hour
+        }
+        
+        if (this.rateLimitTracker.calls >= 200) { // Facebook's rate limit
+            const waitTime = this.rateLimitTracker.resetTime - now;
+            throw new Error(`Rate limit exceeded. Try again in ${Math.ceil(waitTime / 60000)} minutes.`);
+        }
+        
+        this.rateLimitTracker.calls++;
     }
 
     // Obter informações do usuário
@@ -57,15 +90,21 @@ class MetaAdsAPI {
     async initFacebookSDK() {
         if (this.isSDKLoaded) return Promise.resolve();
         
-        // Verificar se está em HTTPS (relaxar verificação para produção)
+        // Verificar se está em HTTPS (melhorada detecção de produção)
         if (!this.isHttps && this.mode === 'real') {
             console.warn('⚠️ Facebook SDK requer HTTPS para modo real.');
-            // Em produção (Vercel), forçar HTTPS detection
-            if (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('layer-reports')) {
+            // Detecção melhorada de ambientes de produção
+            const isProduction = window.location.hostname.includes('vercel.app') || 
+                                 window.location.hostname.includes('layer-reports') ||
+                                 window.location.hostname.includes('netlify.app') ||
+                                 window.location.hostname.includes('github.io') ||
+                                 window.location.protocol === 'https:';
+            
+            if (isProduction) {
                 console.log('✅ Detectado ambiente de produção, permitindo SDK');
                 this.isHttps = true;
             } else {
-                return Promise.reject(new Error('Facebook SDK requer HTTPS'));
+                return Promise.reject(new Error('Facebook SDK requer HTTPS em produção'));
             }
         }
 
@@ -85,8 +124,26 @@ class MetaAdsAPI {
                     console.log('Facebook SDK initialized successfully');
                     resolve();
                 } catch (error) {
-                    console.error('Error initializing Facebook SDK:', error);
-                    reject(error);
+                    console.error('Error initializing Facebook SDK with primary App ID:', error);
+                    // Try fallback App ID
+                    try {
+                        console.log('Trying fallback App ID:', this.fallbackAppId);
+                        FB.init({
+                            appId: this.fallbackAppId,
+                            cookie: true,
+                            xfbml: true,
+                            version: 'v18.0',
+                            status: true,
+                            frictionlessRequests: true
+                        });
+                        this.facebookAppId = this.fallbackAppId;
+                        this.isSDKLoaded = true;
+                        console.log('Facebook SDK initialized with fallback App ID');
+                        resolve();
+                    } catch (fallbackError) {
+                        console.error('Error with fallback App ID:', fallbackError);
+                        reject(fallbackError);
+                    }
                 }
             };
 
@@ -139,7 +196,9 @@ class MetaAdsAPI {
                     console.log('🔍 FB.login response:', response);
                     if (response.authResponse) {
                         this.accessToken = response.authResponse.accessToken;
+                        this.tokenExpiresAt = Date.now() + (response.authResponse.expiresIn * 1000);
                         localStorage.setItem('facebook_access_token', this.accessToken);
+                        localStorage.setItem('facebook_token_expires', this.tokenExpiresAt.toString());
                         
                         FB.api('/me', { fields: 'name,email,picture' }, (userResponse) => {
                             if (userResponse.error) {
@@ -287,13 +346,23 @@ class MetaAdsAPI {
             throw new Error('Access token não encontrado. Faça login primeiro.');
         }
 
+        if (this.isTokenExpired()) {
+            throw new Error('Token expirado. Faça login novamente.');
+        }
+
+        this.checkRateLimit();
+
         return new Promise((resolve, reject) => {
             FB.api('/me/adaccounts', { 
                 fields: 'id,name,account_status,currency,timezone_name',
                 access_token: this.accessToken 
             }, (response) => {
                 if (response.error) {
-                    reject(new Error(response.error.message));
+                    const errorMessage = this.errorHandler.handleAPIError(response, 'getRealAdAccounts');
+                    if (response.error.code === 190) { // Invalid token
+                        this.logout();
+                    }
+                    reject(new Error(errorMessage));
                 } else {
                     resolve({
                         data: response.data || []

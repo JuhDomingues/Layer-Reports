@@ -18,6 +18,39 @@ body {
     min-height: 100vh;
 }
 
+/* Connection Status Notification */
+.connection-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease-out;
+}
+
+.connection-notification.online {
+    background-color: #10b981;
+}
+
+.connection-notification.offline {
+    background-color: #ef4444;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 /* Sidebar */
 .sidebar {
     width: 200px;
