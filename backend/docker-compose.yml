@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # Backend API
+  api:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://postgres:password@db:5432/layer_reports
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-jwt-secret-change-this
+      - FACEBOOK_APP_ID=your-facebook-app-id
+      - FACEBOOK_APP_SECRET=your-facebook-app-secret
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      - db
+      - redis
+    networks:
+      - layer-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=layer_reports
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - layer-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - layer-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Prisma Studio (development only)
+  prisma-studio:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: npx prisma studio --port 5555 --hostname 0.0.0.0
+    ports:
+      - "5555:5555"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/layer_reports
+    depends_on:
+      - db
+    networks:
+      - layer-network
+    profiles:
+      - development
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  layer-network:
+    driver: bridge

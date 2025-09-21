@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Carregamento de Contas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #output { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Teste de Carregamento de Contas</h1>
+    
+    <div class="test-result info">
+        <h3>Status do Sistema:</h3>
+        <p id="systemStatus">Verificando...</p>
+    </div>
+    
+    <div>
+        <h3>Testes Disponíveis:</h3>
+        <button onclick="runFullDiagnostic()">Diagnóstico Completo</button>
+        <button onclick="testSpecificBM()">Testar BM 177341406299126</button>
+        <button onclick="testCurrencyDetection()">Testar Detecção de Moeda</button>
+        <button onclick="clearOutput()">Limpar Log</button>
+    </div>
+    
+    <div id="output"></div>
+
+    <script src="js/meta-api.js"></script>
+    <script src="js/main.js"></script>
+    
+    <script>
+        let outputDiv = document.getElementById('output');
+        let systemStatusDiv = document.getElementById('systemStatus');
+        
+        function log(message) {
+            outputDiv.textContent += new Date().toLocaleTimeString() + ' - ' + message + '\n';
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+        
+        function clearOutput() {
+            outputDiv.textContent = '';
+        }
+        
+        function updateSystemStatus() {
+            if (typeof window.metaAdsApp !== 'undefined') {
+                systemStatusDiv.innerHTML = '✅ Aplicação carregada<br>✅ Funções de diagnóstico disponíveis';
+                systemStatusDiv.parentElement.className = 'test-result success';
+            } else {
+                systemStatusDiv.innerHTML = '❌ Aplicação não carregada';
+                systemStatusDiv.parentElement.className = 'test-result error';
+            }
+        }
+        
+        function runFullDiagnostic() {
+            log('🔍 Iniciando diagnóstico completo...');
+            if (typeof window.fullLoadingDiagnostic !== 'undefined') {
+                try {
+                    window.fullLoadingDiagnostic();
+                    log('✅ Diagnóstico executado com sucesso');
+                } catch (error) {
+                    log('❌ Erro no diagnóstico: ' + error.message);
+                }
+            } else {
+                log('❌ Função fullLoadingDiagnostic não encontrada');
+            }
+        }
+        
+        function testSpecificBM() {
+            log('🔍 Testando Business Manager específico...');
+            if (typeof window.debugBM177341406299126 !== 'undefined') {
+                try {
+                    window.debugBM177341406299126();
+                    log('✅ Teste do BM executado com sucesso');
+                } catch (error) {
+                    log('❌ Erro no teste do BM: ' + error.message);
+                }
+            } else {
+                log('❌ Função debugBM177341406299126 não encontrada');
+            }
+        }
+        
+        function testCurrencyDetection() {
+            log('🔍 Testando detecção de moeda...');
+            if (typeof window.metaAdsApp !== 'undefined' && window.metaAdsApp.getCurrencyInfo) {
+                try {
+                    const currencies = ['USD', 'BRL', 'EUR', 'GBP'];
+                    currencies.forEach(currency => {
+                        const info = window.metaAdsApp.getCurrencyInfo(currency);
+                        log(`${currency}: ${info.symbol} - ${info.name}`);
+                    });
+                    log('✅ Detecção de moeda funcionando');
+                } catch (error) {
+                    log('❌ Erro na detecção de moeda: ' + error.message);
+                }
+            } else {
+                log('❌ Função getCurrencyInfo não encontrada');
+            }
+        }
+        
+        // Verificar status quando a página carregar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateSystemStatus();
+                log('📋 Página de teste carregada');
+                log('🔧 Sistema em modo: ' + (window.metaAdsApp?.api?.mode || 'desconhecido'));
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

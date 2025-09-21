@@ -1,0 +1,47 @@
+{
+  "name": "layer-reports-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Layer Reports - Facebook Ads Dashboard",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
+  },
+  "keywords": ["facebook-ads", "dashboard", "api", "nodejs"],
+  "author": "Layer Reports",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "axios": "^1.5.0",
+    "redis": "^4.6.8",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^6.10.0",
+    "express-validator": "^7.0.1",
+    "@prisma/client": "^5.3.1",
+    "prisma": "^5.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.5.0",
+    "@types/cors": "^2.8.13",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/compression": "^1.7.2",
+    "typescript": "^5.1.6",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

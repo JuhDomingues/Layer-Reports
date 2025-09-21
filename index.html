@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer Reports - Dashboard de Relatórios</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="logo-layer-maior.png" alt="Layer Reports" class="logo-image">
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active">
+                        <a href="#dashboard" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#campaigns" class="nav-link">
+                            <i class="fas fa-bullhorn"></i>
+                            <span>Campanhas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#audiences" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Audiências</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#reports" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#settings" class="nav-link" id="settingsNavLink">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Dashboard de Relatórios</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="api-mode-selector">
+                        <i class="fas fa-toggle-on"></i>
+                        <select id="apiMode" class="mode-select">
+                            <option value="demo">📊 Modo Demo</option>
+                            <option value="real">🔗 API Real</option>
+                        </select>
+                    </div>
+                    
+                    <div class="api-status" id="apiStatus">
+                        <span class="status-indicator demo" id="statusIndicator"></span>
+                        <span class="status-text" id="statusText">Modo Demo</span>
+                    </div>
+                    
+                    <button class="facebook-login-btn" id="facebookLoginBtn" style="display: none;">
+                        <i class="fab fa-facebook"></i>
+                        Conectar Facebook
+                    </button>
+                    
+                    <div class="business-manager-selector" id="businessManagerSelector" style="display: none;">
+                        <i class="fas fa-building"></i>
+                        <select id="businessManagerFilter">
+                            <option value="all">Todos os Business Managers</option>
+                        </select>
+                    </div>
+                    
+                    <div class="account-selector" id="accountSelector" style="display: none;">
+                        <i class="fas fa-credit-card"></i>
+                        <select id="accountFilter">
+                            <option value="all">Todas as contas</option>
+                        </select>
+                    </div>
+                    
+                    <div class="campaign-filter">
+                        <i class="fas fa-filter"></i>
+                        <select id="campaignFilter">
+                            <option value="all">Todas as campanhas</option>
+                            <option value="active">Apenas ativas</option>
+                            <option value="paused">Apenas pausadas</option>
+                            <option value="inactive">Apenas inativas</option>
+                        </select>
+                    </div>
+                    
+                    <button class="advanced-filters-btn" id="advancedFiltersBtn">
+                        <i class="fas fa-sliders-h"></i>
+                        Filtros Avançados
+                    </button>
+                    
+                    <div class="date-range-picker">
+                        <i class="fas fa-calendar"></i>
+                        <select id="dateRange">
+                            <option value="7">Últimos 7 dias</option>
+                            <option value="30" selected>Últimos 30 dias</option>
+                            <option value="90">Últimos 90 dias</option>
+                            <option value="custom">Período personalizado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="custom-date-picker" id="customDatePicker" style="display: none;">
+                        <div class="date-inputs">
+                            <div class="date-input-group">
+                                <label for="startDate">De:</label>
+                                <input type="date" id="startDate" class="date-input">
+                            </div>
+                            <div class="date-input-group">
+                                <label for="endDate">Até:</label>
+                                <input type="date" id="endDate" class="date-input">
+                            </div>
+                            <button class="apply-date-btn" id="applyCustomDate">
+                                <i class="fas fa-check"></i>
+                                Aplicar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="refresh-btn" id="refreshData">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    
+                    <div class="user-menu">
+                        <img src="https://ui-avatars.com/api/?name=User&background=1877f2&color=fff" alt="User" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName">Usuário Demo</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- KPI Cards -->
+                <section class="kpi-section">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Investimento Total</h3>
+                                <p class="kpi-value" id="totalSpend">R$ --</p>
+                                <span class="kpi-change positive">12% vs mês anterior</span>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>ROI</h3>
+                                <p class="kpi-value" id="roi">--%</p>
+                                <span class="kpi-change positive">vs mês anterior</span>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Conversões</h3>
+                                <p class="kpi-value" id="conversions">--</p>
+                                <span class="kpi-change positive">8% vs mês anterior</span>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Taxa de Conversão</h3>
+                                <p class="kpi-value" id="conversionRate">--%</p>
+                                <span class="kpi-change positive">5% vs mês anterior</span>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Impressões</h3>
+                                <p class="kpi-value" id="impressions">--</p>
+                                <span class="kpi-change positive">15% vs mês anterior</span>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-mouse-pointer"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Cliques</h3>
+                                <p class="kpi-value" id="clicks">--</p>
+                                <span class="kpi-change positive">10% vs mês anterior</span>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>CTR</h3>
+                                <p class="kpi-value" id="ctr">--%</p>
+                                <span class="kpi-change positive">3% vs mês anterior</span>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="fas fa-filter"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <h3>Campanhas Filtradas</h3>
+                                <p class="kpi-value" id="filteredCampaigns">--</p>
+                                <span class="kpi-change positive">7% vs mês anterior</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Charts Section -->
+                <section class="charts-section">
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>Performance ao Longo do Tempo</h3>
+                                <div class="chart-controls">
+                                    <button class="chart-btn active" data-metric="impressions">Impressões</button>
+                                    <button class="chart-btn" data-metric="clicks">Cliques</button>
+                                    <button class="chart-btn" data-metric="conversions">Conversões</button>
+                                </div>
+                            </div>
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>Top Campanhas</h3>
+                            </div>
+                            <canvas id="campaignsChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tables Section -->
+                <section class="tables-section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>Campanhas Detalhadas</h3>
+                            <div class="table-controls">
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Buscar campanhas..." id="searchCampaigns">
+                                </div>
+                                <button class="export-btn">
+                                    <i class="fas fa-download"></i>
+                                    Exportar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-wrapper">
+                            <table class="data-table" id="campaignsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nome da Campanha</th>
+                                        <th>Status</th>
+                                        <th>Impressões</th>
+                                        <th>Cliques</th>
+                                        <th>CTR</th>
+                                        <th>CPC</th>
+                                        <th>Conversões</th>
+                                        <th>Gasto</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="table-pagination">
+                            <div class="pagination-info">
+                                Mostrando <span id="pageInfo">1-10 de 50</span> resultados
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="pagination-btn" id="prevPage">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="pagination-pages">1</span>
+                                <button class="pagination-btn" id="nextPage">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loadingText">Carregando dados dos relatórios...</p>
+        </div>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div class="modal-overlay" id="configModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Configurações da API</h3>
+                <button class="modal-close" id="closeConfigModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="config-section">
+                    <h4>Facebook App ID</h4>
+                    <div class="input-group">
+                        <input type="text" id="facebookAppId" placeholder="Digite seu Facebook App ID" value="1091093523181393">
+                        <button class="test-connection-btn" id="testConnectionBtn">
+                            <i class="fas fa-plug"></i>
+                            Testar Conexão
+                        </button>
+                    </div>
+                    <small class="help-text">
+                        Obtenha seu App ID em <a href="https://developers.facebook.com/apps/" target="_blank">Facebook Developers</a>
+                    </small>
+                </div>
+                
+                <div class="config-section">
+                    <h4>Permissões Necessárias</h4>
+                    <ul class="permissions-list">
+                        <li><i class="fas fa-check-circle"></i> ads_read - Ler dados de anúncios</li>
+                        <li><i class="fas fa-check-circle"></i> ads_management - Gerenciar campanhas</li>
+                        <li><i class="fas fa-check-circle"></i> read_insights - Ler métricas</li>
+                    </ul>
+                </div>
+                
+                <div class="config-section">
+                    <h4>Status da Conexão</h4>
+                    <div class="connection-status" id="connectionStatus">
+                        <span class="status-dot disconnected"></span>
+                        <span>Desconectado</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelConfig">Cancelar</button>
+                <button class="btn btn-primary" id="saveConfig">Salvar Configurações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Selection Modal -->
+    <div class="modal-overlay" id="accountModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Selecionar Conta de Anúncios</h3>
+            </div>
+            <div class="modal-body">
+                <div class="accounts-list" id="accountsList">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Filters Modal -->
+    <div class="modal-overlay" id="advancedFiltersModal" style="display: none;">
+        <div class="modal-content advanced-filters-modal">
+            <div class="modal-header">
+                <h3>Filtros Avançados de Campanhas</h3>
+                <button class="modal-close" id="closeAdvancedFilters">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <div class="filter-section">
+                        <h4>Status da Campanha</h4>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="ACTIVE" checked> Ativas</label>
+                            <label><input type="checkbox" value="PAUSED"> Pausadas</label>
+                            <label><input type="checkbox" value="ARCHIVED"> Arquivadas</label>
+                            <label><input type="checkbox" value="DELETED"> Excluídas</label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>Objetivo da Campanha</h4>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="CONVERSIONS" checked> Conversões</label>
+                            <label><input type="checkbox" value="TRAFFIC" checked> Tráfego</label>
+                            <label><input type="checkbox" value="BRAND_AWARENESS"> Reconhecimento da Marca</label>
+                            <label><input type="checkbox" value="REACH"> Alcance</label>
+                            <label><input type="checkbox" value="LEAD_GENERATION"> Geração de Leads</label>
+                            <label><input type="checkbox" value="MESSAGES"> Mensagens</label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>Período de Criação</h4>
+                        <div class="date-range-group">
+                            <label>De: <input type="date" id="createdAfter"></label>
+                            <label>Até: <input type="date" id="createdBefore"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>Performance</h4>
+                        <div class="range-group">
+                            <label>Gasto mínimo (R$): <input type="number" id="minSpend" placeholder="0"></label>
+                            <label>Gasto máximo (R$): <input type="number" id="maxSpend" placeholder="10000"></label>
+                            <label>CTR mínimo (%): <input type="number" step="0.01" id="minCTR" placeholder="0"></label>
+                            <label>Conversões mínimas: <input type="number" id="minConversions" placeholder="0"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>Pesquisa por Nome</h4>
+                        <div class="search-group">
+                            <input type="text" id="campaignNameSearch" placeholder="Buscar por nome da campanha...">
+                            <label><input type="checkbox" id="exactMatch"> Correspondência exata</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="clearAllFilters">Limpar Filtros</button>
+                <button class="btn btn-primary" id="applyAdvancedFilters">Aplicar Filtros</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/meta-api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
