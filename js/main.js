@@ -2697,6 +2697,69 @@ window.testCurrencyDetection = testCurrencyDetection;
 window.testAccountSync = testAccountSync;
 window.testCampaignsLoad = testCampaignsLoad;
 window.fullDiagnostic = fullDiagnostic;
+window.debugFacebookConnection = debugFacebookConnection;
+
+// Função para debug específico de conexão Facebook
+function debugFacebookConnection() {
+    console.log('🔍 === DEBUG FACEBOOK CONNECTION ===');
+    
+    // 1. Verificar ambiente
+    console.log('🌍 Ambiente:');
+    console.log('- Protocol:', window.location.protocol);
+    console.log('- Hostname:', window.location.hostname);
+    console.log('- Is Production:', window.location.hostname.includes('vercel.app') || window.location.hostname.includes('layer-reports'));
+    
+    // 2. Verificar App
+    if (typeof window.metaAdsApp === 'undefined') {
+        console.log('❌ App não inicializado');
+        return;
+    }
+    
+    const app = window.metaAdsApp;
+    console.log('📱 App Status:');
+    console.log('- Mode:', app.api.mode);
+    console.log('- Is HTTPS:', app.api.isHttps);
+    console.log('- App ID:', app.api.facebookAppId);
+    console.log('- SDK Loaded:', app.api.isSDKLoaded);
+    
+    // 3. Verificar Facebook SDK
+    console.log('📘 Facebook SDK:');
+    console.log('- FB Available:', typeof window.FB !== 'undefined');
+    if (typeof window.FB !== 'undefined') {
+        console.log('- FB API Available:', typeof window.FB.api === 'function');
+        console.log('- FB Login Available:', typeof window.FB.login === 'function');
+    }
+    
+    // 4. Testar inicialização SDK
+    console.log('🧪 Testando inicialização SDK...');
+    app.api.initFacebookSDK()
+        .then(() => {
+            console.log('✅ SDK inicializado com sucesso');
+            
+            // 5. Testar login
+            console.log('🧪 Testando capacidade de login...');
+            if (window.FB && window.FB.getLoginStatus) {
+                window.FB.getLoginStatus((response) => {
+                    console.log('📊 Status de login:', response.status);
+                    console.log('🔑 Response completo:', response);
+                });
+            }
+        })
+        .catch((error) => {
+            console.error('❌ Erro na inicialização SDK:', error);
+            
+            // Diagnóstico adicional
+            console.log('🔧 Sugestões de correção:');
+            if (window.location.protocol === 'http:') {
+                console.log('- ⚠️ Use HTTPS para Facebook SDK');
+            }
+            if (!window.location.hostname.includes('vercel.app')) {
+                console.log('- ⚠️ Configure domínio no Facebook App');
+            }
+        });
+    
+    console.log('===========================================');
+}
 
 // Inicializar a aplicação quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {

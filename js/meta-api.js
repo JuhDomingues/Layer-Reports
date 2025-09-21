@@ -57,10 +57,16 @@ class MetaAdsAPI {
     async initFacebookSDK() {
         if (this.isSDKLoaded) return Promise.resolve();
         
-        // Verificar se está em HTTPS
-        if (!this.isHttps) {
-            console.warn('⚠️ Facebook SDK não pode ser carregado em HTTP. Use HTTPS para API real.');
-            return Promise.reject(new Error('Facebook SDK requer HTTPS'));
+        // Verificar se está em HTTPS (relaxar verificação para produção)
+        if (!this.isHttps && this.mode === 'real') {
+            console.warn('⚠️ Facebook SDK requer HTTPS para modo real.');
+            // Em produção (Vercel), forçar HTTPS detection
+            if (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('layer-reports')) {
+                console.log('✅ Detectado ambiente de produção, permitindo SDK');
+                this.isHttps = true;
+            } else {
+                return Promise.reject(new Error('Facebook SDK requer HTTPS'));
+            }
         }
 
         return new Promise((resolve, reject) => {
@@ -71,7 +77,9 @@ class MetaAdsAPI {
                         appId: this.facebookAppId,
                         cookie: true,
                         xfbml: true,
-                        version: 'v18.0'
+                        version: 'v18.0',
+                        status: true,
+                        frictionlessRequests: true
                     });
                     this.isSDKLoaded = true;
                     console.log('Facebook SDK initialized successfully');
