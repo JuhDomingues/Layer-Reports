@@ -33,7 +33,7 @@ class MetaAdsInsights {
         this.setupEventListeners();
         this.initializeAPIMode();
         await this.checkExistingAuth();
-        this.loadInitialData();
+        await this.loadInitialData();
         this.setupCharts();
     }
 
@@ -449,7 +449,21 @@ class MetaAdsInsights {
 
     setupPerformanceChart() {
         const ctx = document.getElementById('performanceChart').getContext('2d');
+        
+        // Verificar se dados estão inicializados
+        if (!this.data || !this.data.timeSeries) {
+            console.warn('⚠️ TimeSeries data não inicializado, gerando dados padrão...');
+            this.data = this.data || {};
+            this.data.timeSeries = this.generateTimeSeriesData();
+        }
+        
         const timeData = this.data.timeSeries;
+        
+        // Verificação adicional de segurança
+        if (!timeData.days || !timeData.data) {
+            console.error('❌ Dados de timeSeries inválidos:', timeData);
+            return;
+        }
 
         this.charts.performance = new Chart(ctx, {
             type: 'line',
@@ -505,6 +519,14 @@ class MetaAdsInsights {
 
     setupCampaignsChart() {
         const ctx = document.getElementById('campaignsChart').getContext('2d');
+        
+        // Verificar se dados estão inicializados
+        if (!this.data || !this.data.campaigns) {
+            console.warn('⚠️ Campaigns data não inicializado, gerando dados padrão...');
+            this.data = this.data || {};
+            this.data.campaigns = [];
+        }
+        
         const activeCampaigns = this.data.campaigns
             .filter(c => c.status === 'active')
             .slice(0, 5);
