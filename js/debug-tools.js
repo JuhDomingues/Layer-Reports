@@ -352,11 +352,43 @@ window.addEventListener('error', (event) => {
     }
 });
 
+// Quick popup test
+window.testPopups = async function() {
+    const isAllowed = await window.popupDetector.testPopupBlocking();
+    console.log('Popup test result:', isAllowed ? '✅ Allowed' : '❌ Blocked');
+    if (!isAllowed) {
+        window.popupDetector.showPopupBlockedWarning();
+    }
+    return isAllowed;
+};
+
+// Alternative login test
+window.testAlternativeLogin = async function() {
+    console.group('🧪 Testing Alternative Login Methods');
+    
+    const app = window.metaAdsApp;
+    if (!app) {
+        console.error('❌ metaAdsApp not found');
+        return;
+    }
+
+    try {
+        const result = await window.popupDetector.attemptAlternativeLogin(app.api);
+        console.log('Alternative login result:', result);
+    } catch (error) {
+        console.error('❌ Alternative login failed:', error);
+    }
+    
+    console.groupEnd();
+};
+
 console.log('🛠️ Debug tools loaded. Available commands:');
 console.log('- debugFacebookConnection() - Full connection debug');
 console.log('- testAPIEndpoints() - Test API endpoints');
 console.log('- forceReconnect() - Force FB reconnection with enhanced login');
 console.log('- testEnhancedLogin() - Test new enhanced login flow');
+console.log('- testPopups() - Test if popups are blocked');
+console.log('- testAlternativeLogin() - Test alternative login methods');
 console.log('- clearAPICache() - Clear all cached data');
 console.log('- showErrorLogs() - Show recent errors');
 console.log('- monitorAPIPerformance() - Enable performance monitoring');

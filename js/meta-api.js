@@ -288,7 +288,7 @@ class MetaAdsAPI {
         }
     }
 
-    // Autenticação (híbrida)
+    // Autenticação (híbrida) com fallback inteligente
     async authenticate() {
         if (this.mode === 'demo') {
             return new Promise((resolve) => {
@@ -306,7 +306,178 @@ class MetaAdsAPI {
                 }, 500);
             });
         } else {
-            return this.loginWithFacebook();
+            return this.authenticateWithFallback();
+        }
+    }
+
+    // Autenticação com múltiplas estratégias de fallback
+    async authenticateWithFallback() {
+        console.log('🔍 Starting authentication with fallback strategies...');
+        
+        // Strategy 1: Check if already logged in
+        try {
+            const existingStatus = await this.checkExistingLoginStatus();
+            if (existingStatus.success) {
+                console.log('✅ Using existing Facebook session');
+                return existingStatus;
+            }
+        } catch (error) {
+            console.warn('❌ Existing login check failed:', error.message);
+        }
+
+        // Strategy 2: Direct Facebook login with reduced timeout
+        try {
+            console.log('🔍 Attempting direct Facebook login...');
+            const directResult = await this.loginWithFacebookDirect();
+            if (directResult.success) {
+                return directResult;
+            }
+        } catch (error) {
+            console.warn('❌ Direct Facebook login failed:', error.message);
+        }
+
+        // Strategy 3: Alternative SDK initialization
+        try {
+            console.log('🔍 Trying alternative SDK initialization...');
+            await this.reinitializeSDK();
+            const alternativeResult = await this.loginWithFacebookDirect();
+            if (alternativeResult.success) {
+                return alternativeResult;
+            }
+        } catch (error) {
+            console.warn('❌ Alternative SDK login failed:', error.message);
+        }
+
+        // Strategy 4: Fallback to demo mode with warning
+        console.warn('⚠️ All authentication strategies failed, falling back to demo mode');
+        return {
+            success: false,
+            message: 'Falha na autenticação Facebook. Usando modo demo temporariamente.',
+            fallbackMode: 'demo'
+        };
+    }
+
+    // Check existing login status
+    async checkExistingLoginStatus() {
+        if (!window.FB) {
+            throw new Error('Facebook SDK not available');
+        }
+
+        return new Promise((resolve, reject) => {
+            FB.getLoginStatus((response) => {
+                console.log('🔍 Facebook login status:', response);
+                
+                if (response.status === 'connected' && response.authResponse) {
+                    this.accessToken = response.authResponse.accessToken;
+                    this.tokenExpiresAt = Date.now() + (response.authResponse.expiresIn * 1000);
+                    this.connectionStatus = 'connected';
+                    
+                    // Get user info
+                    FB.api('/me', { fields: 'name,email,picture' }, (userResponse) => {
+                        if (userResponse.error) {
+                            reject(new Error(userResponse.error.message));
+                        } else {
+                            this.user = userResponse;
+                            localStorage.setItem('facebook_access_token', this.accessToken);
+                            localStorage.setItem('facebook_token_expires', this.tokenExpiresAt.toString());
+                            
+                            resolve({
+                                success: true,
+                                user: userResponse,
+                                accessToken: this.accessToken,
+                                message: 'Sessão Facebook existente restaurada'
+                            });
+                        }
+                    });
+                } else {
+                    reject(new Error('No existing Facebook session'));
+                }
+            });
+        });
+    }
+
+    // Direct login with reduced complexity
+    async loginWithFacebookDirect() {
+        if (!window.FB) {
+            throw new Error('Facebook SDK not available');
+        }
+
+        return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Login timeout after 60 seconds'));
+            }, 60000); // Reduced timeout
+
+            FB.login((response) => {
+                clearTimeout(timeout);
+                console.log('🔍 FB.login direct response:', response);
+                
+                if (response.authResponse) {
+                    this.accessToken = response.authResponse.accessToken;
+                    this.tokenExpiresAt = Date.now() + (response.authResponse.expiresIn * 1000);
+                    localStorage.setItem('facebook_access_token', this.accessToken);
+                    localStorage.setItem('facebook_token_expires', this.tokenExpiresAt.toString());
+                    
+                    FB.api('/me', { fields: 'name,email,picture' }, (userResponse) => {
+                        if (userResponse.error) {
+                            this.connectionStatus = 'disconnected';
+                            resolve({
+                                success: false,
+                                message: 'Erro ao obter dados do usuário: ' + userResponse.error.message
+                            });
+                        } else {
+                            this.user = userResponse;
+                            this.connectionStatus = 'connected';
+                            resolve({
+                                success: true,
+                                user: userResponse,
+                                accessToken: this.accessToken,
+                                expiresIn: response.authResponse.expiresIn
+                            });
+                        }
+                    });
+                } else {
+                    this.connectionStatus = 'disconnected';
+                    resolve({
+                        success: false,
+                        message: 'Login cancelado ou não autorizado'
+                    });
+                }
+            }, { 
+                scope: this.requiredPermissions.join(','),
+                return_scopes: true,
+                auth_type: 'rerequest' // Force re-authentication
+            });
+        });
+    }
+
+    // Reinitialize SDK with alternative configuration
+    async reinitializeSDK() {
+        console.log('🔍 Reinitializing Facebook SDK...');
+        
+        // Clear existing SDK
+        if (window.FB) {
+            delete window.FB;
+        }
+        
+        // Remove existing script
+        const existingScript = document.getElementById('facebook-jssdk');
+        if (existingScript) {
+            existingScript.remove();
+        }
+        
+        this.isSDKLoaded = false;
+        
+        // Try with fallback App ID
+        const originalAppId = this.facebookAppId;
+        this.facebookAppId = this.fallbackAppId;
+        
+        try {
+            await this.initFacebookSDK();
+            console.log('✅ SDK reinitialized with fallback App ID');
+        } catch (error) {
+            // Restore original App ID if fallback fails
+            this.facebookAppId = originalAppId;
+            throw error;
         }
     }
 
