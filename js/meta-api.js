@@ -144,13 +144,15 @@ class MetaAdsAPI {
                         FB.api('/me', { fields: 'name,email,picture' }, (userResponse) => {
                             if (userResponse.error) {
                                 this.connectionStatus = 'disconnected';
-                                reject({
+                                console.error('❌ Erro ao obter dados do usuário:', userResponse.error);
+                                resolve({
                                     success: false,
                                     message: 'Erro ao obter dados do usuário: ' + userResponse.error.message
                                 });
                             } else {
                                 this.user = userResponse;
                                 this.connectionStatus = 'connected';
+                                console.log('✅ Login Facebook bem-sucedido:', userResponse.name);
                                 
                                 resolve({
                                     success: true,
@@ -162,7 +164,8 @@ class MetaAdsAPI {
                         });
                     } else {
                         this.connectionStatus = 'disconnected';
-                        reject({
+                        console.warn('❌ Login cancelado pelo usuário');
+                        resolve({
                             success: false,
                             message: 'Login cancelado ou não autorizado'
                         });
@@ -174,7 +177,10 @@ class MetaAdsAPI {
             });
         } catch (error) {
             this.connectionStatus = 'disconnected';
-            throw {
+            console.error('❌ Erro na inicialização Facebook SDK:', error);
+            
+            // Retornar resultado em vez de throw para não quebrar o fluxo
+            return {
                 success: false,
                 message: 'Erro ao inicializar Facebook SDK: ' + error.message
             };

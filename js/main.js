@@ -961,13 +961,24 @@ class MetaAdsInsights {
     async handleFacebookLogin() {
         const loadingText = document.getElementById('loadingText');
         
+        console.log('🔗 Iniciando login Facebook...');
         if (loadingText) loadingText.textContent = 'Conectando com Facebook...';
         this.showLoading();
         
         try {
-            const result = await this.api.authenticate();
+            // Adicionar timeout para evitar travamento
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout: Login demorou mais de 30 segundos')), 30000);
+            });
             
-            if (result.success) {
+            const result = await Promise.race([
+                this.api.authenticate(),
+                timeoutPromise
+            ]);
+            
+            console.log('📊 Resultado do login:', result);
+            
+            if (result && result.success) {
                 this.isAuthenticated = true;
                 
                 if (loadingText) loadingText.textContent = 'Buscando contas de anúncios...';
@@ -1004,16 +1015,35 @@ class MetaAdsInsights {
                 } else {
                     this.showError('Nenhuma conta de anúncio encontrada. Verifique suas permissões no Facebook.');
                 }
+            } else {
+                // Login não foi bem-sucedido
+                console.warn('❌ Login Facebook falhou:', result);
+                this.showError('Login cancelado ou falhou. Tente novamente.');
             }
         } catch (error) {
-            console.error('Facebook login error:', error);
+            console.error('❌ Facebook login error:', error);
             this.isAuthenticated = false;
             this.updateUIForMode('real');
-            this.showError('Erro ao conectar: ' + (error.message || 'Erro desconhecido'));
+            
+            // Mensagens de erro mais específicas
+            let errorMessage = 'Erro ao conectar com Facebook';
+            if (error.message.includes('Timeout')) {
+                errorMessage = 'Timeout: Verifique sua conexão e tente novamente';
+            } else if (error.message.includes('SDK')) {
+                errorMessage = 'Erro no Facebook SDK. Recarregue a página e tente novamente';
+            } else if (error.message.includes('permissions')) {
+                errorMessage = 'Permissões insuficientes. Verifique se tem acesso ao Business Manager';
+            } else {
+                errorMessage += ': ' + (error.message || 'Erro desconhecido');
+            }
+            
+            this.showError(errorMessage);
+        } finally {
+            // Sempre limpar loading, independente do resultado
+            console.log('🔄 Finalizando processo de login...');
+            if (loadingText) loadingText.textContent = 'Carregando dados dos relatórios...';
+            this.hideLoading();
         }
-        
-        if (loadingText) loadingText.textContent = 'Carregando dados dos relatórios...';
-        this.hideLoading();
     }
 
     showAccountSelectionModal(accounts, user) {
@@ -2698,6 +2728,7 @@ window.testAccountSync = testAccountSync;
 window.testCampaignsLoad = testCampaignsLoad;
 window.fullDiagnostic = fullDiagnostic;
 window.debugFacebookConnection = debugFacebookConnection;
+window.testFacebookLoginStep = testFacebookLoginStep;
 
 // Função para debug específico de conexão Facebook
 function debugFacebookConnection() {
@@ -2759,6 +2790,81 @@ function debugFacebookConnection() {
         });
     
     console.log('===========================================');
+}
+
+// Função para testar login Facebook passo a passo
+async function testFacebookLoginStep() {
+    console.log('🧪 === TESTE FACEBOOK LOGIN PASSO A PASSO ===');
+    
+    if (typeof window.metaAdsApp === 'undefined') {
+        console.log('❌ App não inicializado');
+        return;
+    }
+    
+    const app = window.metaAdsApp;
+    
+    try {
+        // Passo 1: Verificar modo
+        console.log('1️⃣ Verificando modo API...');
+        if (app.api.mode !== 'real') {
+            console.log('⚠️ Alterando para modo real...');
+            app.api.setMode('real');
+        }
+        console.log('✅ Modo real ativo');
+        
+        // Passo 2: Inicializar SDK
+        console.log('2️⃣ Inicializando Facebook SDK...');
+        await app.api.initFacebookSDK();
+        console.log('✅ SDK inicializado');
+        
+        // Passo 3: Verificar FB
+        console.log('3️⃣ Verificando FB object...');
+        if (typeof window.FB === 'undefined') {
+            throw new Error('FB object não disponível');
+        }
+        console.log('✅ FB object disponível');
+        
+        // Passo 4: Testar getLoginStatus
+        console.log('4️⃣ Verificando status de login...');
+        window.FB.getLoginStatus((response) => {
+            console.log('📊 Status atual:', response.status);
+            console.log('📋 Response completa:', response);
+            
+            // Passo 5: Tentar login
+            console.log('5️⃣ Iniciando processo de login...');
+            console.log('🔑 Permissões solicitadas:', app.api.requiredPermissions);
+            
+            window.FB.login((loginResponse) => {
+                console.log('📊 Login response:', loginResponse);
+                
+                if (loginResponse.authResponse) {
+                    console.log('✅ Login bem-sucedido!');
+                    console.log('🔑 Access Token:', loginResponse.authResponse.accessToken);
+                    
+                    // Passo 6: Testar API call
+                    console.log('6️⃣ Testando chamada /me...');
+                    window.FB.api('/me', { fields: 'name,email,picture' }, (meResponse) => {
+                        if (meResponse.error) {
+                            console.error('❌ Erro na API /me:', meResponse.error);
+                        } else {
+                            console.log('✅ Dados do usuário:', meResponse);
+                        }
+                    });
+                } else {
+                    console.warn('❌ Login cancelado ou falhou');
+                    console.log('📋 Status:', loginResponse.status);
+                }
+            }, { 
+                scope: app.api.requiredPermissions.join(','),
+                return_scopes: true 
+            });
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro no teste:', error);
+    }
+    
+    console.log('===============================================');
 }
 
 // Inicializar a aplicação quando o DOM estiver carregado
