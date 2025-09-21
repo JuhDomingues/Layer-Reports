@@ -233,6 +233,295 @@ body {
     color: #42b883;
 }
 
+/* Facebook Configuration Modal */
+.facebook-config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10003;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.facebook-config-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e4e6ea;
+    background: linear-gradient(135deg, #1877f2, #42a5f5);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.config-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.current-domain {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e4e6ea;
+}
+
+.current-domain h3 {
+    margin: 0 0 1rem 0;
+    color: #1c1e21;
+}
+
+.domain-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.domain-info strong {
+    font-size: 1.1rem;
+    color: #1877f2;
+    font-family: monospace;
+}
+
+.env-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.env-badge.production {
+    background: #d4edda;
+    color: #155724;
+}
+
+.env-badge.development {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.config-steps {
+    padding: 1.5rem 2rem;
+}
+
+.config-step {
+    display: flex;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: #1877f2;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1c1e21;
+    font-size: 1.1rem;
+}
+
+.step-content p {
+    margin: 0 0 1rem 0;
+    color: #65676b;
+    line-height: 1.5;
+}
+
+.step-details {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.step-details li {
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #1c1e21;
+}
+
+.step-details li:before {
+    content: "•";
+    color: #1877f2;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.config-copy {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e4e6ea;
+}
+
+.config-copy h3 {
+    margin: 0 0 1.5rem 0;
+    color: #1c1e21;
+}
+
+.copy-section {
+    margin-bottom: 1rem;
+}
+
+.copy-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #1c1e21;
+}
+
+.copy-value {
+    background: white;
+    border: 2px solid #e4e6ea;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.copy-value:hover {
+    border-color: #1877f2;
+    background: #f0f8ff;
+}
+
+.copy-hint {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #65676b;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.copy-value:hover .copy-hint {
+    opacity: 1;
+}
+
+.config-actions {
+    padding: 1.5rem 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    border-top: 1px solid #e4e6ea;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #1877f2;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #166fe5;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #e4e6ea;
+    color: #1c1e21;
+}
+
+.btn-secondary:hover {
+    background: #d8dadf;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .facebook-config-content {
+        width: 98%;
+        margin: 1%;
+    }
+    
+    .config-header {
+        padding: 1rem;
+    }
+    
+    .config-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .current-domain, .config-steps, .config-copy, .config-actions {
+        padding: 1rem;
+    }
+    
+    .config-step {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .step-number {
+        align-self: flex-start;
+    }
+    
+    .config-actions {
+        flex-direction: column;
+    }
+}
+
 /* Sidebar */
 .sidebar {
     width: 200px;

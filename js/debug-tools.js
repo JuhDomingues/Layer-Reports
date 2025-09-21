@@ -382,6 +382,16 @@ window.testAlternativeLogin = async function() {
     console.groupEnd();
 };
 
+// Show Facebook configuration modal
+window.showFacebookConfig = function() {
+    window.domainDetector.showConfigurationModal();
+};
+
+// Get current domain configuration
+window.getDomainConfig = function() {
+    return window.domainDetector.displayCurrentConfig();
+};
+
 console.log('🛠️ Debug tools loaded. Available commands:');
 console.log('- debugFacebookConnection() - Full connection debug');
 console.log('- testAPIEndpoints() - Test API endpoints');
@@ -389,6 +399,8 @@ console.log('- forceReconnect() - Force FB reconnection with enhanced login');
 console.log('- testEnhancedLogin() - Test new enhanced login flow');
 console.log('- testPopups() - Test if popups are blocked');
 console.log('- testAlternativeLogin() - Test alternative login methods');
+console.log('- showFacebookConfig() - Show Facebook domain configuration guide');
+console.log('- getDomainConfig() - Display current domain configuration');
 console.log('- clearAPICache() - Clear all cached data');
 console.log('- showErrorLogs() - Show recent errors');
 console.log('- monitorAPIPerformance() - Enable performance monitoring');
