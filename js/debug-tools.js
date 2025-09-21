@@ -132,7 +132,7 @@ window.testAPIEndpoints = async function() {
     console.groupEnd();
 };
 
-// Force reconnection
+// Force reconnection with enhanced login
 window.forceReconnect = async function() {
     console.group('🔄 Force Reconnect');
     
@@ -143,27 +143,66 @@ window.forceReconnect = async function() {
     }
 
     try {
-        console.log('1. Logging out...');
-        await app.api.logout();
+        console.log('1. Initializing login helper...');
+        if (!app.api.loginHelper) {
+            app.api.loginHelper = new FacebookLoginHelper(app.api);
+        }
         
-        console.log('2. Clearing SDK...');
+        console.log('2. Enhanced logout...');
+        await app.api.loginHelper.enhancedLogout();
+        
+        console.log('3. Clearing SDK...');
         delete window.FB;
         app.api.isSDKLoaded = false;
         
-        console.log('3. Reinitializing SDK...');
+        console.log('4. Reinitializing SDK...');
         await app.api.initFacebookSDK();
         
-        console.log('4. Attempting login...');
-        const result = await app.api.loginWithFacebook();
+        console.log('5. Attempting enhanced login...');
+        const result = await app.api.loginHelper.enhancedLogin();
         
         if (result.success) {
-            console.log('✅ Reconnection successful');
+            console.log('✅ Enhanced reconnection successful');
         } else {
-            console.error('❌ Reconnection failed:', result.message);
+            console.error('❌ Enhanced reconnection failed:', result.message);
         }
         
     } catch (error) {
         console.error('❌ Force reconnect failed:', error.message);
+    }
+    
+    console.groupEnd();
+};
+
+// Enhanced login test
+window.testEnhancedLogin = async function() {
+    console.group('🧪 Testing Enhanced Login');
+    
+    const app = window.metaAdsApp;
+    if (!app) {
+        console.error('❌ metaAdsApp not found');
+        return;
+    }
+
+    try {
+        // Initialize login helper
+        if (!app.api.loginHelper) {
+            app.api.loginHelper = new FacebookLoginHelper(app.api);
+        }
+
+        console.log('🔍 Testing enhanced login flow...');
+        const result = await app.api.loginHelper.enhancedLogin();
+        
+        if (result.success) {
+            console.log('✅ Enhanced login successful');
+            console.log('User:', result.user?.name);
+            console.log('Token expires:', new Date(app.api.tokenExpiresAt));
+        } else {
+            console.error('❌ Enhanced login failed:', result.message);
+        }
+        
+    } catch (error) {
+        console.error('❌ Enhanced login test failed:', error.message);
     }
     
     console.groupEnd();
@@ -316,7 +355,8 @@ window.addEventListener('error', (event) => {
 console.log('🛠️ Debug tools loaded. Available commands:');
 console.log('- debugFacebookConnection() - Full connection debug');
 console.log('- testAPIEndpoints() - Test API endpoints');
-console.log('- forceReconnect() - Force FB reconnection');
+console.log('- forceReconnect() - Force FB reconnection with enhanced login');
+console.log('- testEnhancedLogin() - Test new enhanced login flow');
 console.log('- clearAPICache() - Clear all cached data');
 console.log('- showErrorLogs() - Show recent errors');
 console.log('- monitorAPIPerformance() - Enable performance monitoring');

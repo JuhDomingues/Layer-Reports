@@ -13,6 +13,7 @@ class MetaAdsAPI {
         // Initialize error handler and connection monitor
         this.errorHandler = new APIErrorHandler();
         this.connectionMonitor = new ConnectionMonitor();
+        this.loginHelper = null; // Will be initialized when needed
         
         this.facebookAppId = localStorage.getItem('facebook_app_id') || '1469476877413511';
         this.fallbackAppId = '1091093523181393'; // Fallback App ID
@@ -182,6 +183,11 @@ class MetaAdsAPI {
             console.log('🔍 loginWithFacebook started');
             this.connectionStatus = 'connecting';
             
+            // Check network connection first
+            if (!this.connectionMonitor.isConnected()) {
+                throw new Error('Sem conexão com a internet');
+            }
+            
             console.log('🔍 Initializing Facebook SDK...');
             await this.initFacebookSDK();
             
@@ -192,8 +198,21 @@ class MetaAdsAPI {
             console.log('🔍 Facebook SDK initialized, calling FB.login...');
             
             return new Promise((resolve, reject) => {
+                console.log('🔍 Calling FB.login with permissions:', this.requiredPermissions);
+                
                 FB.login((response) => {
                     console.log('🔍 FB.login response:', response);
+                    
+                    // Check for user cancellation
+                    if (!response || response.status === 'not_authorized') {
+                        console.warn('❌ Login não autorizado ou cancelado');
+                        resolve({
+                            success: false,
+                            message: 'Login cancelado ou não autorizado pelo usuário'
+                        });
+                        return;
+                    }
+                    
                     if (response.authResponse) {
                         this.accessToken = response.authResponse.accessToken;
                         this.tokenExpiresAt = Date.now() + (response.authResponse.expiresIn * 1000);

@@ -988,11 +988,12 @@ class MetaAdsInsights {
         this.showLoading();
         
         try {
-            // Adicionar timeout para evitar travamento
+            // Adicionar timeout mais generoso para login manual
             const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Timeout: Login demorou mais de 30 segundos')), 30000);
+                setTimeout(() => reject(new Error('Timeout: Login demorou mais de 120 segundos')), 120000);
             });
             
+            console.log('🔍 Iniciando autenticação...');
             const result = await Promise.race([
                 this.api.authenticate(),
                 timeoutPromise
