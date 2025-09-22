@@ -2802,7 +2802,7 @@ html {
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
+    display: none; /* Hidden by default, controlled by JavaScript */
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
