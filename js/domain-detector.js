@@ -134,87 +134,7 @@ class DomainDetector {
 
     // Show configuration modal
     showConfigurationModal() {
-        this.removeExistingModal();
-
-        const instructions = this.generateConfigInstructions();
-        const config = this.getFacebookDomainConfig();
-
-        const modal = document.createElement('div');
-        modal.id = 'facebook-config-modal';
-        modal.className = 'facebook-config-modal';
-        modal.innerHTML = `
-            <div class="facebook-config-content">
-                <div class="config-header">
-                    <h2>🔧 ${instructions.title}</h2>
-                    <button class="close-btn" onclick="document.getElementById('facebook-config-modal').remove()">
-                        ✕
-                    </button>
-                </div>
-                
-                <div class="current-domain">
-                    <h3>📍 Domínio Atual Detectado:</h3>
-                    <div class="domain-info">
-                        <strong>${this.currentDomain.hostname}</strong>
-                        <span class="env-badge ${this.isProduction ? 'production' : 'development'}">
-                            ${this.isProduction ? 'Produção' : 'Desenvolvimento'}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="config-steps">
-                    ${instructions.steps.map(step => `
-                        <div class="config-step">
-                            <div class="step-number">${step.step}</div>
-                            <div class="step-content">
-                                <h4>${step.title}</h4>
-                                <p>${step.action}</p>
-                                ${step.details ? `
-                                    <ul class="step-details">
-                                        ${step.details.map(detail => `<li>${detail}</li>`).join('')}
-                                    </ul>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="config-copy">
-                    <h3>📋 Copie os valores exatos:</h3>
-                    <div class="copy-section">
-                        <label>App Domains:</label>
-                        <div class="copy-value" onclick="navigator.clipboard.writeText('${config.appDomains.join(', ')}')">
-                            ${config.appDomains.join(', ')}
-                            <span class="copy-hint">Clique para copiar</span>
-                        </div>
-                    </div>
-                    <div class="copy-section">
-                        <label>Valid OAuth Redirect URIs:</label>
-                        <div class="copy-value" onclick="navigator.clipboard.writeText('${config.validOAuthRedirectURIs.join('\\n')}')">
-                            ${config.validOAuthRedirectURIs.join('<br>')}
-                            <span class="copy-hint">Clique para copiar</span>
-                        </div>
-                    </div>
-                    <div class="copy-section">
-                        <label>Website URL:</label>
-                        <div class="copy-value" onclick="navigator.clipboard.writeText('${config.websiteURL}')">
-                            ${config.websiteURL}
-                            <span class="copy-hint">Clique para copiar</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="config-actions">
-                    <a href="https://developers.facebook.com/apps/778309504913999/" target="_blank" class="btn-primary">
-                        🔗 Abrir Facebook Developers
-                    </a>
-                    <button onclick="window.domainDetector.testAfterConfig()" class="btn-secondary">
-                        🧪 Testar Após Configuração
-                    </button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
+        // Do nothing.
     }
 
     // Remove existing modal
@@ -256,26 +176,7 @@ class DomainDetector {
 
     // Auto-detect and show if configuration is needed
     autoDetectAndShow() {
-        // Check if we're getting the host unknown error
-        const originalConsoleError = console.error;
-        let hostUnknownDetected = false;
-
-        console.error = function(...args) {
-            const message = args.join(' ').toLowerCase();
-            if (message.includes('host') && (message.includes('unknown') || message.includes('jssdk'))) {
-                hostUnknownDetected = true;
-            }
-            originalConsoleError.apply(console, args);
-        };
-
-        // Show modal if error detected or if not configured
-        setTimeout(() => {
-            if (hostUnknownDetected || !this.isConfigurationComplete()) {
-                this.showConfigurationModal();
-            }
-            // Restore original console.error
-            console.error = originalConsoleError;
-        }, 2000);
+        // Do nothing.
     }
 
     // Check if configuration seems complete
