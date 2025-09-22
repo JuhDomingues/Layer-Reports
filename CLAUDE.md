@@ -43,7 +43,7 @@ Layer/
 │   └── meta-api.js        # Simulated Meta Ads API integration
 └── assets/images/         # Static image resources
 ```
-1469476877413511
+778309504913999
 ### Core Components
 
 **MetaAdsInsights Class (main.js)**

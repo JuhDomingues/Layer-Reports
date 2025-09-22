@@ -95,7 +95,7 @@ class DomainDetector {
                 {
                     step: 1,
                     title: 'Acessar Facebook Developers',
-                    action: 'Vá para https://developers.facebook.com/apps/1469476877413511/'
+                    action: 'Vá para https://developers.facebook.com/apps/778309504913999/'
                 },
                 {
                     step: 2,
@@ -204,7 +204,7 @@ class DomainDetector {
                 </div>
 
                 <div class="config-actions">
-                    <a href="https://developers.facebook.com/apps/1469476877413511/" target="_blank" class="btn-primary">
+                    <a href="https://developers.facebook.com/apps/778309504913999/" target="_blank" class="btn-primary">
                         🔗 Abrir Facebook Developers
                     </a>
                     <button onclick="window.domainDetector.testAfterConfig()" class="btn-secondary">

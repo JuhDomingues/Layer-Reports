@@ -408,7 +408,7 @@ window.checkAppStatus = async function() {
 };
 
 // Show app status modal manually
-window.showAppStatus = function(appId = '1469476877413511', status = 'inactive') {
+window.showAppStatus = function(appId = '778309504913999', status = 'inactive') {
     window.appStatusManager.showAppStatusModal(appId, status);
 };
 
@@ -428,6 +428,76 @@ window.debugProductionApp = async function() {
     console.groupEnd();
 };
 
+// Create new Facebook App (guided process)
+window.createNewFacebookApp = function() {
+    console.group('🚀 Creating New Facebook App');
+    console.log('Opening step-by-step Facebook App creation guide...');
+    
+    if (typeof window.FacebookAppCreator === 'undefined') {
+        console.error('❌ FacebookAppCreator not loaded');
+        console.log('💡 Make sure facebook-app-creator.js is loaded');
+        console.groupEnd();
+        return;
+    }
+
+    try {
+        const creator = new FacebookAppCreator();
+        creator.startGuide();
+        console.log('✅ Facebook App creation guide opened');
+        console.log('💡 Follow the step-by-step instructions in the modal');
+    } catch (error) {
+        console.error('❌ Failed to open creation guide:', error);
+    }
+    
+    console.groupEnd();
+};
+
+// Show development mode options
+window.showDevelopmentOptions = function() {
+    console.group('🧪 Development Options');
+    console.log('Opening development mode guide...');
+    
+    if (typeof window.appCreator === 'undefined') {
+        console.error('❌ FacebookAppCreator not loaded');
+        console.log('💡 Make sure facebook-app-creator.js is loaded');
+        console.groupEnd();
+        return;
+    }
+
+    try {
+        window.appCreator.showDevelopmentMode();
+        console.log('✅ Development mode guide opened');
+        console.log('💡 Use Graph API Explorer for testing without App Review');
+    } catch (error) {
+        console.error('❌ Failed to open development guide:', error);
+    }
+    
+    console.groupEnd();
+};
+
+// Show App Review help
+window.showAppReviewHelp = function() {
+    console.group('📋 App Review Help');
+    console.log('Opening App Review guide...');
+    
+    if (typeof window.appCreator === 'undefined') {
+        console.error('❌ FacebookAppCreator not loaded');
+        console.log('💡 Make sure facebook-app-creator.js is loaded');
+        console.groupEnd();
+        return;
+    }
+
+    try {
+        window.appCreator.showAppReviewHelp();
+        console.log('✅ App Review guide opened');
+        console.log('💡 Follow the process to get production permissions');
+    } catch (error) {
+        console.error('❌ Failed to open App Review guide:', error);
+    }
+    
+    console.groupEnd();
+};
+
 // Force update to new App ID
 window.updateToNewAppId = function() {
     console.group('🔄 Updating to new Facebook App ID');
@@ -442,9 +512,9 @@ window.updateToNewAppId = function() {
         console.log('1. Clearing old App ID from localStorage...');
         localStorage.removeItem('facebook_app_id');
         
-        console.log('2. Setting new App ID: 1469476877413511');
-        app.api.facebookAppId = '1469476877413511';
-        localStorage.setItem('facebook_app_id', '1469476877413511');
+        console.log('2. Setting new App ID: 778309504913999');
+        app.api.facebookAppId = '778309504913999';
+        localStorage.setItem('facebook_app_id', '778309504913999');
         
         console.log('3. Clearing SDK cache...');
         delete window.FB;
@@ -455,7 +525,7 @@ window.updateToNewAppId = function() {
         
         console.log('5. Reinitializing with new App ID...');
         return app.api.initFacebookSDK().then(() => {
-            console.log('✅ Successfully updated to new App ID: 1469476877413511');
+            console.log('✅ Successfully updated to new App ID: 778309504913999');
             console.log('💡 You can now try: forceReconnect()');
         });
         
@@ -467,19 +537,31 @@ window.updateToNewAppId = function() {
 };
 
 console.log('🛠️ Debug tools loaded. Available commands:');
+console.log('');
+console.log('🚀 APP CREATION & SETUP:');
+console.log('- createNewFacebookApp() - Step-by-step guide to create new Facebook App');
+console.log('- showDevelopmentOptions() - Guide for testing without App Review');
+console.log('- showAppReviewHelp() - Help with Facebook App Review process');
+console.log('');
+console.log('🔍 DEBUGGING & TESTING:');
 console.log('- debugFacebookConnection() - Full connection debug');
 console.log('- testAPIEndpoints() - Test API endpoints');
+console.log('- healthCheck() - Run connection health check');
+console.log('- debugProductionApp() - Comprehensive production app debugging');
+console.log('');
+console.log('🔑 AUTHENTICATION:');
 console.log('- forceReconnect() - Force FB reconnection with enhanced login');
 console.log('- testEnhancedLogin() - Test new enhanced login flow');
 console.log('- testPopups() - Test if popups are blocked');
 console.log('- testAlternativeLogin() - Test alternative login methods');
+console.log('');
+console.log('⚙️ CONFIGURATION:');
 console.log('- showFacebookConfig() - Show Facebook domain configuration guide');
 console.log('- getDomainConfig() - Display current domain configuration');
+console.log('- updateToNewAppId() - Update to new Facebook App ID (778309504913999)');
 console.log('- checkAppStatus() - Check Facebook app status and show solutions');
-console.log('- showAppStatus() - Show app status modal manually');
-console.log('- debugProductionApp() - Comprehensive production app debugging');
-console.log('- updateToNewAppId() - Update to new Facebook App ID (1469476877413511)');
+console.log('');
+console.log('🧹 MAINTENANCE:');
 console.log('- clearAPICache() - Clear all cached data');
 console.log('- showErrorLogs() - Show recent errors');
 console.log('- monitorAPIPerformance() - Enable performance monitoring');
-console.log('- healthCheck() - Run connection health check');

@@ -7,7 +7,7 @@ class FacebookProductionDebugger {
     }
 
     // Comprehensive production app debugging
-    async debugProductionApp(appId = '1469476877413511') {
+    async debugProductionApp(appId = '778309504913999') {
         console.group('🔍 Facebook Production App Debug');
         console.log(`Debugging App ID: ${appId}`);
         
@@ -397,7 +397,7 @@ class FacebookProductionDebugger {
                     priority: 'critical',
                     issue: 'App ID Invalid or App Inactive',
                     solution: 'Verify App ID and status in Facebook Developers',
-                    action: 'Check https://developers.facebook.com/apps/1469476877413511/'
+                    action: 'Check https://developers.facebook.com/apps/778309504913999/'
                 });
             }
         }
@@ -486,7 +486,7 @@ class FacebookProductionDebugger {
                         <button onclick="window.productionDebugger.retryWithFixes()" class="btn btn-primary">
                             🔄 Retry with Fixes
                         </button>
-                        <a href="https://developers.facebook.com/apps/1469476877413511/" target="_blank" class="btn btn-secondary">
+                        <a href="https://developers.facebook.com/apps/778309504913999/" target="_blank" class="btn btn-secondary">
                             🔗 Open Facebook Console
                         </a>
                     </div>

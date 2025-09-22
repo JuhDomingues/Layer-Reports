@@ -3,7 +3,7 @@
 class FacebookAppStatusManager {
     constructor() {
         this.appStatuses = {
-            '1469476877413511': 'checking', // Will be determined
+            '778309504913999': 'checking', // Will be determined
             '1091093523181393': 'checking'  // Fallback app
         };
         this.activeAppId = null;
@@ -307,7 +307,7 @@ class FacebookAppStatusManager {
     async findBestAvailableApp() {
         console.log('🔍 Finding best available Facebook app...');
         
-        const apps = ['1469476877413511', '1091093523181393'];
+        const apps = ['778309504913999', '1091093523181393'];
         const results = {};
         
         for (const appId of apps) {
@@ -360,8 +360,8 @@ class FacebookAppStatusManager {
             }
         } catch (error) {
             console.error('❌ Failed to detect app status:', error);
-            this.showAppStatusModal('1469476877413511', 'unknown');
-            return { appId: '1469476877413511', status: 'unknown' };
+            this.showAppStatusModal('778309504913999', 'unknown');
+            return { appId: '778309504913999', status: 'unknown' };
         }
     }
 }
