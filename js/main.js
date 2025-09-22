@@ -831,24 +831,32 @@ class MetaAdsInsights {
         
         if (newMode === oldMode) return;
         
-        this.showLoading();
+        this.showLoading(`Alterando para modo ${newMode}...`);
         
         try {
             this.api.setMode(newMode);
-            this.updateUIForMode(newMode);
+            this.updateUIForMode(newMode); // Update UI immediately
             
-            if (newMode === 'real' && !this.isAuthenticated) {
-                this.showSuccess('Modo alterado para API Real. Clique em "Conectar Facebook" para começar.');
-            } else {
-                await this.loadInitialData();
-                this.showSuccess(`Modo alterado para: ${newMode === 'demo' ? 'Demo' : 'API Real'}`);
+            if (newMode === 'real') {
+                if (this.isAuthenticated) {
+                    this.showSuccess('Modo alterado para API Real. Carregando seus dados...');
+                    await this.loadRealData(); // Load real data if already authenticated
+                } else {
+                    this.showSuccess('Modo alterado para API Real. Conecte com o Facebook para começar.');
+                    // Clear any existing demo data from the view
+                    this.showEmptyAccountState(); 
+                }
+            } else { // newMode === 'demo'
+                this.showSuccess('Modo alterado para Demo. Carregando dados de exemplo...');
+                await this.loadInitialData(); // Load mock data for demo mode
             }
         } catch (error) {
             console.error('Error changing mode:', error);
             this.showError('Erro ao alterar modo: ' + error.message);
-            // Revert mode
+            // Revert mode and UI
             event.target.value = oldMode;
             this.api.setMode(oldMode);
+            this.updateUIForMode(oldMode);
         }
         
         this.hideLoading();
