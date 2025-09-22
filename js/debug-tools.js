@@ -392,6 +392,26 @@ window.getDomainConfig = function() {
     return window.domainDetector.displayCurrentConfig();
 };
 
+// Check Facebook app status
+window.checkAppStatus = async function() {
+    console.group('🔍 Checking Facebook App Status');
+    
+    try {
+        const result = await window.appStatusManager.autoDetectAndHandle();
+        console.log('App status result:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Failed to check app status:', error);
+    }
+    
+    console.groupEnd();
+};
+
+// Show app status modal manually
+window.showAppStatus = function(appId = '1469476877413511', status = 'inactive') {
+    window.appStatusManager.showAppStatusModal(appId, status);
+};
+
 // Force update to new App ID
 window.updateToNewAppId = function() {
     console.group('🔄 Updating to new Facebook App ID');
@@ -439,6 +459,8 @@ console.log('- testPopups() - Test if popups are blocked');
 console.log('- testAlternativeLogin() - Test alternative login methods');
 console.log('- showFacebookConfig() - Show Facebook domain configuration guide');
 console.log('- getDomainConfig() - Display current domain configuration');
+console.log('- checkAppStatus() - Check Facebook app status and show solutions');
+console.log('- showAppStatus() - Show app status modal manually');
 console.log('- updateToNewAppId() - Update to new Facebook App ID (1469476877413511)');
 console.log('- clearAPICache() - Clear all cached data');
 console.log('- showErrorLogs() - Show recent errors');
