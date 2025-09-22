@@ -874,6 +874,12 @@ class MetaAdsInsights {
             if (loginBtn) {
                 loginBtn.style.display = 'flex';
                 loginBtn.style.visibility = 'visible';
+                
+                // Se não está autenticado, adicionar animação chamativa
+                if (!this.isAuthenticated) {
+                    this.highlightFacebookButton();
+                    this.showConnectNotification();
+                }
             }
             if (statusIndicator) {
                 statusIndicator.className = 'status-indicator real-disconnected';
@@ -889,6 +895,7 @@ class MetaAdsInsights {
         } else {
             if (loginBtn) {
                 loginBtn.style.display = 'none';
+                this.removeButtonHighlight();
             }
             if (statusIndicator) statusIndicator.className = 'status-indicator demo';
             if (statusText) statusText.textContent = 'Modo Demo';
@@ -912,6 +919,63 @@ class MetaAdsInsights {
             // Load Business Managers when authenticated
             this.loadBusinessManagers();
         }
+    }
+
+    highlightFacebookButton() {
+        const loginBtn = document.getElementById('facebookLoginBtn');
+        if (loginBtn) {
+            // Adicionar classe de destaque
+            loginBtn.classList.add('facebook-btn-highlight');
+            
+            // Remover destaque após 5 segundos
+            setTimeout(() => {
+                this.removeButtonHighlight();
+            }, 5000);
+        }
+    }
+
+    removeButtonHighlight() {
+        const loginBtn = document.getElementById('facebookLoginBtn');
+        if (loginBtn) {
+            loginBtn.classList.remove('facebook-btn-highlight');
+        }
+    }
+
+    showConnectNotification() {
+        // Remover notificação existente se houver
+        const existingNotification = document.querySelector('.connect-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Criar notificação de conexão
+        const notification = document.createElement('div');
+        notification.className = 'connect-notification';
+        notification.innerHTML = `
+            <div class="connect-notification-content" onclick="document.getElementById('facebookLoginBtn').scrollIntoView({behavior: 'smooth'}); document.getElementById('facebookLoginBtn').focus();">
+                <i class="fab fa-facebook-f"></i>
+                <div class="notification-text">
+                    <h4>Conecte com o Facebook</h4>
+                    <p>Clique aqui ou no botão "Conectar Facebook" para acessar seus dados reais de campanhas</p>
+                </div>
+                <button class="notification-close" onclick="event.stopPropagation(); this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Adicionar cursor pointer para indicar que é clicável
+        const content = notification.querySelector('.connect-notification-content');
+        content.style.cursor = 'pointer';
+        
+        // Remover automaticamente após 10 segundos
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 10000);
     }
 
     // Modal Management
@@ -999,6 +1063,10 @@ class MetaAdsInsights {
         
         console.log('🔗 Iniciando login Facebook...');
         if (loadingText) loadingText.textContent = 'Conectando com Facebook...';
+        
+        // Remover destaque do botão quando o usuário clicar
+        this.removeButtonHighlight();
+        
         this.showLoading();
         
         try {

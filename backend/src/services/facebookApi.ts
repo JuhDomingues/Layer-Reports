@@ -3,6 +3,7 @@ import { config } from '../config';
 import { logger } from '../utils/logger';
 import { redisClient } from '../utils/redis';
 import { AppError } from '../middleware/errorHandler';
+import { RetryableFacebookApi, CircuitBreaker } from '../utils/retryHandler';
 
 export interface FacebookCampaign {
   id: string;
@@ -42,9 +43,14 @@ export interface FacebookAccount {
 export class FacebookApiService {
   private client: AxiosInstance;
   private accessToken: string;
+  private retryHandler: RetryableFacebookApi;
+  private circuitBreaker: CircuitBreaker;
 
   constructor(accessToken: string) {
     this.accessToken = accessToken;
+    this.retryHandler = new RetryableFacebookApi();
+    this.circuitBreaker = new CircuitBreaker(5, 60000, 300000);
+    
     this.client = axios.create({
       baseURL: `${config.FACEBOOK_BASE_URL}/${config.FACEBOOK_GRAPH_API_VERSION}`,
       timeout: 30000,
@@ -99,12 +105,17 @@ export class FacebookApiService {
         return JSON.parse(cached);
       }
 
-      const response: AxiosResponse = await this.client.get('/me/adaccounts', {
-        params: {
-          fields: 'id,name,account_status,currency,timezone_name',
-          limit: 100
-        }
-      });
+      const response: AxiosResponse = await this.retryHandler.execute(
+        () => this.circuitBreaker.execute(() => 
+          this.client.get('/me/adaccounts', {
+            params: {
+              fields: 'id,name,account_status,currency,timezone_name',
+              limit: 100
+            }
+          })
+        ),
+        'getAdAccounts'
+      );
 
       const accounts = response.data.data as FacebookAccount[];
       
