@@ -863,14 +863,34 @@ class MetaAdsInsights {
     }
 
     updateUIForMode(mode) {
+        console.log('🔄 updateUIForMode chamada com modo:', mode);
         const loginBtn = document.getElementById('facebookLoginBtn');
         const statusIndicator = document.getElementById('statusIndicator');
         const statusText = document.getElementById('statusText');
         const userName = document.getElementById('userName');
         const userAvatar = document.getElementById('userAvatar');
         
+        console.log('🎯 Elemento botão encontrado:', !!loginBtn);
+        if (loginBtn) {
+            console.log('📱 Estilo atual do botão:', window.getComputedStyle(loginBtn).display);
+            console.log('📦 Classes do botão:', loginBtn.className);
+            console.log('👁️ Visibilidade atual:', window.getComputedStyle(loginBtn).visibility);
+        }
+        
         if (mode === 'real') {
-            if (loginBtn) loginBtn.style.display = 'flex';
+            console.log('✅ Modo real - tentando mostrar botão');
+            if (loginBtn) {
+                loginBtn.style.display = 'flex';
+                loginBtn.style.visibility = 'visible';
+                console.log('📱 Display definido como:', loginBtn.style.display);
+                console.log('👁️ Visibility definida como:', loginBtn.style.visibility);
+                console.log('📐 BoundingRect:', loginBtn.getBoundingClientRect());
+                
+                // Force override any conflicting styles
+                loginBtn.style.setProperty('display', 'flex', 'important');
+            } else {
+                console.error('❌ Botão não encontrado no DOM!');
+            }
             if (statusIndicator) {
                 statusIndicator.className = 'status-indicator real-disconnected';
                 if (!this.isAuthenticated) {
@@ -883,7 +903,11 @@ class MetaAdsInsights {
                 statusText.textContent = this.isAuthenticated ? 'API Real Conectada' : 'API Real Desconectada';
             }
         } else {
-            if (loginBtn) loginBtn.style.display = 'none';
+            console.log('❌ Modo demo - escondendo botão');
+            if (loginBtn) {
+                loginBtn.style.display = 'none';
+                console.log('📱 Display definido como:', loginBtn.style.display);
+            }
             if (statusIndicator) statusIndicator.className = 'status-indicator demo';
             if (statusText) statusText.textContent = 'Modo Demo';
             if (userName) userName.textContent = 'Usuário Demo';
