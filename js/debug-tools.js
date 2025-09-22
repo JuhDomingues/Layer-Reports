@@ -412,6 +412,22 @@ window.showAppStatus = function(appId = '1469476877413511', status = 'inactive')
     window.appStatusManager.showAppStatusModal(appId, status);
 };
 
+// Debug production app issues
+window.debugProductionApp = async function() {
+    console.group('🔍 Production App Debug');
+    console.log('Starting comprehensive production app debugging...');
+    
+    try {
+        const result = await window.productionDebugger.debugProductionApp();
+        console.log('Debug completed:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Debug failed:', error);
+    }
+    
+    console.groupEnd();
+};
+
 // Force update to new App ID
 window.updateToNewAppId = function() {
     console.group('🔄 Updating to new Facebook App ID');
@@ -461,6 +477,7 @@ console.log('- showFacebookConfig() - Show Facebook domain configuration guide')
 console.log('- getDomainConfig() - Display current domain configuration');
 console.log('- checkAppStatus() - Check Facebook app status and show solutions');
 console.log('- showAppStatus() - Show app status modal manually');
+console.log('- debugProductionApp() - Comprehensive production app debugging');
 console.log('- updateToNewAppId() - Update to new Facebook App ID (1469476877413511)');
 console.log('- clearAPICache() - Clear all cached data');
 console.log('- showErrorLogs() - Show recent errors');

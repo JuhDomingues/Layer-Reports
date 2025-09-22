@@ -233,6 +233,241 @@ body {
     color: #42b883;
 }
 
+/* Production Debug Modal */
+.production-debug-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10005;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.debug-modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 1000px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.debug-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.debug-header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.debug-header button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.debug-body {
+    padding: 2rem;
+}
+
+.debug-summary {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid #007bff;
+}
+
+.debug-summary h3 {
+    margin: 0 0 1rem 0;
+    color: #1c1e21;
+}
+
+.debug-summary code {
+    background: #e9ecef;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.debug-tests {
+    margin-bottom: 2rem;
+}
+
+.debug-tests h3 {
+    color: #1c1e21;
+    margin-bottom: 1.5rem;
+}
+
+.debug-test-result {
+    border: 2px solid #e4e6ea;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.debug-test-result.success {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #d4edda, #ffffff);
+}
+
+.debug-test-result.failed {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #f8d7da, #ffffff);
+}
+
+.debug-test-result.skipped {
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #fff3cd, #ffffff);
+}
+
+.debug-test-result h4 {
+    margin: 0 0 1rem 0;
+    color: #1c1e21;
+}
+
+.debug-test-result .error {
+    color: #dc3545;
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.debug-test-result .details {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 1rem;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    margin: 1rem 0 0 0;
+    max-height: 200px;
+}
+
+.debug-recommendations {
+    margin-bottom: 2rem;
+}
+
+.debug-recommendations h3 {
+    color: #1c1e21;
+    margin-bottom: 1.5rem;
+}
+
+.recommendation {
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+}
+
+.recommendation.critical {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, #f8d7da, #ffffff);
+}
+
+.recommendation.high {
+    border-left-color: #fd7e14;
+    background: linear-gradient(135deg, #ffeaa7, #ffffff);
+}
+
+.recommendation.medium {
+    border-left-color: #ffc107;
+    background: linear-gradient(135deg, #fff3cd, #ffffff);
+}
+
+.recommendation h4 {
+    margin: 0 0 1rem 0;
+    color: #1c1e21;
+}
+
+.recommendation p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+    color: #495057;
+}
+
+.debug-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e4e6ea;
+}
+
+.debug-actions .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.debug-actions .btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.debug-actions .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.debug-actions .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.debug-actions .btn-secondary:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .debug-modal-content {
+        width: 98%;
+        margin: 1%;
+    }
+    
+    .debug-header, .debug-body {
+        padding: 1rem;
+    }
+    
+    .debug-actions {
+        flex-direction: column;
+    }
+    
+    .debug-test-result .details {
+        font-size: 0.75rem;
+    }
+}
+
 /* Facebook App Status Modal */
 .app-status-modal {
     position: fixed;
