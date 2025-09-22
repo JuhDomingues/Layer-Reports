@@ -1,10 +1,12 @@
 // Meta Ads Dashboard - Hybrid Mode (Demo + Real API)
 class MetaAdsAPI {
     constructor() {
-        // Detectar se está em HTTP e forçar modo demo
+        // Detectar se está em HTTP e forçar modo demo, a menos que seja localhost
         const isHttps = window.location.protocol === 'https:';
-        if (!isHttps) {
-            console.warn('⚠️ HTTP detectado - Facebook SDK requer HTTPS. Forçando modo demo.');
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+        if (!isHttps && !isLocalhost) {
+            console.warn('⚠️ HTTP detectado e não é localhost - Facebook SDK requer HTTPS. Forçando modo demo.');
             this.mode = 'demo';
         } else {
             this.mode = localStorage.getItem('api_mode') || 'demo'; // 'demo' or 'real'
@@ -34,7 +36,8 @@ class MetaAdsAPI {
 
     // Alternar modo API
     setMode(mode) {
-        if (mode === 'real' && !this.isHttps) {
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (mode === 'real' && !this.isHttps && !isLocalhost) {
             console.warn('⚠️ Modo real requer HTTPS. Mantendo modo demo.');
             this.mode = 'demo';
             return false;

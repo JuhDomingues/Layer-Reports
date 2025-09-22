@@ -24,6 +24,7 @@ class DomainDetector {
                hostname.includes('netlify.app') ||
                hostname.includes('github.io') ||
                hostname.includes('layer-reports') ||
+               hostname === 'reports.layermarketing.com.br' ||
                (window.location.protocol === 'https:' && hostname !== 'localhost');
     }
 

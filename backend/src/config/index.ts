@@ -2,11 +2,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Define allowed origins
+const allowedOrigins = [
+  'https://reports.layermarketing.com.br',
+  'http://localhost:8000', // Frontend dev
+  'http://localhost:3000'  // Alternative frontend dev
+];
+
 export const config = {
   // Server
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '3001'),
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  CORS_ORIGIN: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : allowedOrigins,
 
   // Database
   DATABASE_URL: process.env.DATABASE_URL || '',

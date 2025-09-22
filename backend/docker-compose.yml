@@ -14,7 +14,7 @@ services:
       - JWT_SECRET=your-jwt-secret-change-this
       - FACEBOOK_APP_ID=your-facebook-app-id
       - FACEBOOK_APP_SECRET=your-facebook-app-secret
-      - CORS_ORIGIN=http://localhost:3000
+      - CORS_ORIGIN=https://reports.layermarketing.com.br,http://localhost:8000,http://localhost:3000
     depends_on:
       - db
       - redis
