@@ -300,4 +300,4 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // Auto-show configuration if needed
-window.domainDetector.autoDetectAndShow();
+// window.domainDetector.autoDetectAndShow();
