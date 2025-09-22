@@ -392,6 +392,44 @@ window.getDomainConfig = function() {
     return window.domainDetector.displayCurrentConfig();
 };
 
+// Force update to new App ID
+window.updateToNewAppId = function() {
+    console.group('🔄 Updating to new Facebook App ID');
+    
+    const app = window.metaAdsApp;
+    if (!app) {
+        console.error('❌ metaAdsApp not found');
+        return;
+    }
+
+    try {
+        console.log('1. Clearing old App ID from localStorage...');
+        localStorage.removeItem('facebook_app_id');
+        
+        console.log('2. Setting new App ID: 1469476877413511');
+        app.api.facebookAppId = '1469476877413511';
+        localStorage.setItem('facebook_app_id', '1469476877413511');
+        
+        console.log('3. Clearing SDK cache...');
+        delete window.FB;
+        app.api.isSDKLoaded = false;
+        
+        console.log('4. Clearing authentication cache...');
+        app.api.logout();
+        
+        console.log('5. Reinitializing with new App ID...');
+        return app.api.initFacebookSDK().then(() => {
+            console.log('✅ Successfully updated to new App ID: 1469476877413511');
+            console.log('💡 You can now try: forceReconnect()');
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to update App ID:', error);
+    }
+    
+    console.groupEnd();
+};
+
 console.log('🛠️ Debug tools loaded. Available commands:');
 console.log('- debugFacebookConnection() - Full connection debug');
 console.log('- testAPIEndpoints() - Test API endpoints');
@@ -401,6 +439,7 @@ console.log('- testPopups() - Test if popups are blocked');
 console.log('- testAlternativeLogin() - Test alternative login methods');
 console.log('- showFacebookConfig() - Show Facebook domain configuration guide');
 console.log('- getDomainConfig() - Display current domain configuration');
+console.log('- updateToNewAppId() - Update to new Facebook App ID (1469476877413511)');
 console.log('- clearAPICache() - Clear all cached data');
 console.log('- showErrorLogs() - Show recent errors');
 console.log('- monitorAPIPerformance() - Enable performance monitoring');

@@ -16,7 +16,7 @@ class MetaAdsAPI {
         this.loginHelper = null; // Will be initialized when needed
         
         this.facebookAppId = localStorage.getItem('facebook_app_id') || '1469476877413511';
-        this.fallbackAppId = '1091093523181393'; // Fallback App ID
+        this.fallbackAppId = '1091093523181393'; // Fallback App ID (old, keep for compatibility)
         this.accessToken = localStorage.getItem('facebook_access_token');
         this.accountId = localStorage.getItem('facebook_account_id');
         this.isSDKLoaded = false;

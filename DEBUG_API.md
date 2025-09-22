@@ -12,7 +12,7 @@
 
 ### 2. **Verificar Configuração do Facebook App**
 
-Acesse: https://developers.facebook.com/apps/1091093523181393/
+Acesse: https://developers.facebook.com/apps/1469476877413511/
 
 **Verifique se está configurado:**
 - ✅ **Produtos > Facebook Login** ativado
@@ -84,7 +84,7 @@ Procure por estas mensagens no console:
 ✅ **Sucesso:**
 - "Loading Facebook SDK..."
 - "Facebook SDK script loaded"
-- "Initializing Facebook SDK with App ID: 1091093523181393"
+- "Initializing Facebook SDK with App ID: 1469476877413511"
 - "Facebook SDK initialized successfully"
 
 ❌ **Erro:**
