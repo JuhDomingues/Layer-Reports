@@ -2812,6 +2812,18 @@ html {
     overflow: hidden;
 }
 
+/* Força exibição quando no modo API real */
+.facebook-login-btn.api-real-mode {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Estilo para modo visível */
+.facebook-login-btn.visible {
+    display: flex !important;
+}
+
 .facebook-login-btn::before {
     content: '';
     position: absolute;

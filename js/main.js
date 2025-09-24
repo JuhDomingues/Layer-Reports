@@ -872,14 +872,20 @@ class MetaAdsInsights {
         
         if (mode === 'real') {
             if (loginBtn) {
+                // Usar classes CSS para garantir visibilidade
+                loginBtn.classList.add('api-real-mode', 'visible');
                 loginBtn.style.display = 'flex';
                 loginBtn.style.visibility = 'visible';
+                
+                console.log('👆 Botão Facebook exibido para modo real');
                 
                 // Se não está autenticado, adicionar animação chamativa
                 if (!this.isAuthenticated) {
                     this.highlightFacebookButton();
                     this.showConnectNotification();
                 }
+            } else {
+                console.error('❌ Botão Facebook não encontrado no DOM');
             }
             if (statusIndicator) {
                 statusIndicator.className = 'status-indicator real-disconnected';
@@ -894,8 +900,12 @@ class MetaAdsInsights {
             }
         } else {
             if (loginBtn) {
+                // Remover classes e ocultar botão
+                loginBtn.classList.remove('api-real-mode', 'visible');
                 loginBtn.style.display = 'none';
                 this.removeButtonHighlight();
+                
+                console.log('👆 Botão Facebook ocultado para modo demo');
             }
             if (statusIndicator) statusIndicator.className = 'status-indicator demo';
             if (statusText) statusText.textContent = 'Modo Demo';
