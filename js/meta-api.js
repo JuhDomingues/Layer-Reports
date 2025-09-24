@@ -328,6 +328,41 @@ class MetaAdsAPI {
             });
         });
     }
+
+    // Buscar contas de anúncio de um Business Manager específico
+    async getAccountsForBusinessManager(businessManagerId) {
+        if (this.mode === 'demo') {
+            return new Promise(resolve => setTimeout(() => resolve({
+                data: [
+                    { id: 'act_demo_1', name: 'Conta Demo 1 (BRL)', account_status: 1, currency: 'BRL' },
+                    { id: 'act_demo_2', name: 'Conta Demo 2 (USD)', account_status: 1, currency: 'USD' }
+                ]
+            }), 300));
+        }
+        return this.getRealAccountsForBusinessManager(businessManagerId);
+    }
+
+    async getRealAccountsForBusinessManager(businessManagerId) {
+        console.log(`[DEBUG] getRealAccountsForBusinessManager: Start for BM ${businessManagerId}`);
+        if (!this.accessToken) throw new Error('Access token não encontrado.');
+        if (!businessManagerId) throw new Error('Business Manager ID é obrigatório.');
+
+        return new Promise((resolve, reject) => {
+            FB.api(`/${businessManagerId}/adaccounts`, { 
+                fields: 'id,name,account_status,currency,timezone_name,business',
+                limit: 200,
+                access_token: this.accessToken 
+            }, (response) => {
+                console.log(`[DEBUG] getRealAccountsForBusinessManager: /${businessManagerId}/adaccounts response:`, response);
+                if (response.error) {
+                    console.error('[DEBUG] getRealAccountsForBusinessManager: API Error', response.error);
+                    reject(new Error(this.errorHandler.handleAPIError(response, 'getRealAccountsForBusinessManager')));
+                } else {
+                    resolve({ data: response.data || [] });
+                }
+            });
+        });
+    }
     
     // Buscar campanhas (híbrido)
     async getCampaigns(accountId, filters = {}) {
