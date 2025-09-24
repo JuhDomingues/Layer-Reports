@@ -240,7 +240,7 @@ window.testProductionLogin = function() {
                 this.disabled = false;
                 
             }, {
-                scope: 'email',
+                scope: 'email,public_profile,pages_show_list',
                 return_scopes: true,
                 auth_type: 'rerequest'
             });

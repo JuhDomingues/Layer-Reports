@@ -44,7 +44,7 @@ window.simpleFacebookLogin = async function() {
                 console.log('📊 Resposta do login:', response);
                 resolve(response);
             }, {
-                scope: 'email,public_profile',
+                scope: 'email,public_profile,pages_show_list',
                 return_scopes: true,
                 auth_type: 'rerequest'
             });

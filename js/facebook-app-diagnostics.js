@@ -260,7 +260,7 @@ window.testConfiguredApp = function(appId = '778309504913999') {
             }
             
         }, {
-            scope: 'email',
+            scope: 'email,public_profile,pages_show_list',
             return_scopes: true,
             auth_type: 'rerequest'
         });
