@@ -121,19 +121,34 @@ window.TokenManager = {
             console.log('✅ Modo real ativado via seletor');
         }
         
-        // Forçar atualização da UI
-        if (window.metaAdsApp) {
-            window.metaAdsApp.updateUIForMode('real');
-            
-            // Tentar carregar dados reais
-            if (window.metaAdsApp.loadRealData) {
-                window.metaAdsApp.loadRealData().then(() => {
-                    console.log('✅ Dados reais carregados');
-                    alert('✅ Modo real ativado!\n\nDados de campanhas reais sendo carregados...');
-                }).catch(error => {
-                    console.error('❌ Erro ao carregar dados:', error);
-                    alert('⚠️ Modo real ativado, mas houve erro ao carregar dados.\n\nVerifique o console para detalhes.');
-                });
+        // Usar Account Manager para inicializar completamente
+        if (window.AccountManager) {
+            window.AccountManager.initializeWithToken().then((success) => {
+                if (success) {
+                    console.log('✅ Sistema inicializado com sucesso');
+                    alert('✅ Modo real ativado!\n\nContas encontradas e dados carregados com sucesso!');
+                } else {
+                    console.error('❌ Falha na inicialização');
+                    alert('⚠️ Modo real ativado, mas houve problemas ao carregar dados.\n\nVerifique se sua conta tem acesso ao Meta Ads.');
+                }
+            }).catch(error => {
+                console.error('❌ Erro na inicialização:', error);
+                alert(`❌ Erro ao inicializar:\n\n${error.message}`);
+            });
+        } else {
+            // Fallback para método antigo
+            if (window.metaAdsApp) {
+                window.metaAdsApp.updateUIForMode('real');
+                
+                if (window.metaAdsApp.loadRealData) {
+                    window.metaAdsApp.loadRealData().then(() => {
+                        console.log('✅ Dados reais carregados (fallback)');
+                        alert('✅ Modo real ativado!');
+                    }).catch(error => {
+                        console.error('❌ Erro ao carregar dados:', error);
+                        alert('⚠️ Erro: Nenhuma conta selecionada.\n\nExecute: autoSelectAccount()');
+                    });
+                }
             }
         }
     },
