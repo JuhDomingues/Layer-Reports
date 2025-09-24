@@ -71,6 +71,17 @@ window.AccountManager = {
                 await window.metaAdsApp.loadRealData();
                 console.log('✅ Dados reais carregados com sucesso');
                 
+                // Inicializar filtros após carregar dados
+                setTimeout(() => {
+                    if (window.CampaignFilters) {
+                        window.CampaignFilters.init();
+                        console.log('✅ Filtros de campanha inicializados');
+                    }
+                    if (window.updateFilterButton) {
+                        window.updateFilterButton();
+                    }
+                }, 1000);
+                
                 return true;
             } else {
                 console.error('❌ Método loadRealData não encontrado');

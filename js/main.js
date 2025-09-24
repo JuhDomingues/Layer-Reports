@@ -614,7 +614,7 @@ class MetaAdsInsights {
                 <td><span class="status-badge ${campaign.status}">${this.getStatusLabel(campaign.status)}</span></td>
                 <td>${this.formatNumber(campaign.impressions)}</td>
                 <td>${this.formatNumber(campaign.clicks)}</td>
-                <td>${campaign.ctr.toFixed(2)}%</td>
+                <td>${this.safeCTR(campaign.ctr)}%</td>
                 <td>${this.formatCurrency(campaign.cpc)}</td>
                 <td>${campaign.conversions}</td>
                 <td>${this.formatCurrency(campaign.spend)}</td>
@@ -1558,6 +1558,27 @@ class MetaAdsInsights {
         return currencyMap[currency] || { symbol: currency, name: currency, locale: 'en-US' };
     }
 
+    // Função segura para formatar CTR
+    safeCTR(value) {
+        if (value === null || value === undefined) return '0.00';
+        
+        // Se é string, tentar converter
+        if (typeof value === 'string') {
+            const cleanValue = value.replace(/[^\d.,]/g, '');
+            const numValue = parseFloat(cleanValue.replace(',', '.'));
+            if (isNaN(numValue)) return '0.00';
+            return numValue.toFixed(2);
+        }
+        
+        // Se é número
+        if (typeof value === 'number') {
+            if (isNaN(value)) return '0.00';
+            return value.toFixed(2);
+        }
+        
+        return '0.00';
+    }
+    
     formatCurrency(value, currency = null) {
         // Use selected account currency if not specified
         const targetCurrency = currency || this.selectedAccountCurrency || 'USD';
@@ -1993,8 +2014,17 @@ class MetaAdsInsights {
                 
                 try {
                     console.log('🔍 Starting convertRealDataToFormat with:', campaigns.data.length, 'campaigns');
+                    
+                    // Normalizar dados da API antes de processar
+                    let normalizedCampaigns = campaigns.data;
+                    if (window.DataNormalizer) {
+                        console.log('🔧 Normalizando dados da API...');
+                        normalizedCampaigns = window.DataNormalizer.normalizeCampaigns(campaigns.data);
+                        console.log('✅ Dados normalizados com sucesso');
+                    }
+                    
                     // Converter dados reais para formato do dashboard
-                    this.data = await this.convertRealDataToFormat(campaigns.data);
+                    this.data = await this.convertRealDataToFormat(normalizedCampaigns);
                     console.log('🔍 convertRealDataToFormat completed successfully');
                     
                     if (!this.data || !this.data.campaigns) {
