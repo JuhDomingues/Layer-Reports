@@ -2079,8 +2079,22 @@ class MetaAdsInsights {
         let realInsightsCount = 0;
         let mockInsightsCount = 0;
         
-        for (const campaign of realCampaigns) {
-            console.log('🔍 Processing campaign:', campaign.name, 'ID:', campaign.id);
+        // Limitar processamento para evitar travamento
+        const maxCampaigns = Math.min(realCampaigns.length, 20);
+        console.log(`🔍 Processing first ${maxCampaigns} campaigns to avoid timeout`);
+        
+        const campaignsToProcess = realCampaigns.slice(0, maxCampaigns);
+        
+        for (let i = 0; i < campaignsToProcess.length; i++) {
+            const campaign = campaignsToProcess[i];
+            const progress = Math.round(((i + 1) / campaignsToProcess.length) * 100);
+            
+            console.log(`🔍 Processing campaign ${i + 1}/${campaignsToProcess.length} (${progress}%):`, campaign.name, 'ID:', campaign.id);
+            
+            // Update loading message with progress
+            if (window.metaAdsApp) {
+                window.metaAdsApp.showLoading(`Carregando métricas das campanhas... ${progress}% (${i + 1}/${campaignsToProcess.length})`);
+            }
             
             try {
                 // Try to get real insights, fallback to mock if error
@@ -2089,7 +2103,14 @@ class MetaAdsInsights {
                 if (this.api.mode === 'real') {
                     try {
                         console.log('🔍 Fetching insights for campaign:', campaign.id);
-                        const insightsData = await this.api.getInsights(campaign.id, 'campaign', '30');
+                        
+                        // Add timeout to prevent hanging
+                        const insightsPromise = this.api.getInsights(campaign.id, '30');
+                        const timeoutPromise = new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout getting insights')), 10000)
+                        );
+                        
+                        const insightsData = await Promise.race([insightsPromise, timeoutPromise]);
                         console.log('🔍 Insights data received:', insightsData);
                         
                         if (insightsData.data && insightsData.data.length > 0) {
@@ -2136,6 +2157,7 @@ class MetaAdsInsights {
                         }
                     } catch (insightError) {
                         console.warn(`🔍 Could not get insights for campaign ${campaign.name}:`, insightError);
+                        insights = null; // Explicitly set to null to use mock data
                     }
                 }
                 
