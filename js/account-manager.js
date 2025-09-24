@@ -134,6 +134,12 @@ window.AccountManager = {
     async showAccountSelection() {
         console.log('🔍 === MOSTRANDO SELEÇÃO DE CONTAS ===');
         
+        // Verificar se deve usar o seletor de gerenciadores de negócios
+        if (window.BusinessManagerSelector) {
+            console.log('🏢 Usando seletor de gerenciadores de negócios');
+            return window.BusinessManagerSelector.showBusinessManagerSelector();
+        }
+        
         try {
             const accounts = await window.metaAdsApp.api.getAdAccounts();
             

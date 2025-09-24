@@ -34,8 +34,8 @@ window.TokenManager = {
             console.log('✅ Aplicação atualizada com token');
         }
         
-        // Mostrar sucesso
-        this.showTokenSuccess();
+        // Configuração silenciosa - não mostrar modal
+        console.log('✅ Token configurado silenciosamente');
         
         return true;
     },
@@ -125,15 +125,14 @@ window.TokenManager = {
         if (window.AccountManager) {
             window.AccountManager.initializeWithToken().then((success) => {
                 if (success) {
-                    console.log('✅ Sistema inicializado com sucesso');
-                    alert('✅ Modo real ativado!\n\nContas encontradas e dados carregados com sucesso!');
+                    console.log('✅ Sistema inicializado com sucesso - dados carregados');
                 } else {
                     console.error('❌ Falha na inicialização');
-                    alert('⚠️ Modo real ativado, mas houve problemas ao carregar dados.\n\nVerifique se sua conta tem acesso ao Meta Ads.');
+                    console.warn('⚠️ Verifique se sua conta tem acesso ao Meta Ads');
                 }
             }).catch(error => {
                 console.error('❌ Erro na inicialização:', error);
-                alert(`❌ Erro ao inicializar:\n\n${error.message}`);
+                console.warn('⚠️ Problema ao carregar dados reais');
             });
         } else {
             // Fallback para método antigo
@@ -292,17 +291,23 @@ window.activateRealMode = function() {
     TokenManager.activateRealMode();
 };
 
-// Auto-configurar token se ainda não estiver configurado
+// Auto-configurar token silenciosamente
 document.addEventListener('DOMContentLoaded', function() {
     const existingToken = TokenManager.checkExistingToken();
     
     if (!existingToken) {
-        console.log('🔑 Configurando token automaticamente...');
+        console.log('🔑 Configurando token automaticamente (silencioso)...');
         setTimeout(() => {
             TokenManager.setupToken();
-        }, 3000); // Aguardar 3 segundos para a página carregar
+        }, 2000); // Configurar mais rápido
     } else {
-        console.log('✅ Token já configurado');
+        console.log('✅ Token já configurado - ativando modo real');
+        // Se já tem token, garantir que está no modo real
+        setTimeout(() => {
+            if (window.AccountManager) {
+                window.AccountManager.initializeWithToken();
+            }
+        }, 1000);
     }
 });
 
