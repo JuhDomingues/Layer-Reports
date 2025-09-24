@@ -10,12 +10,18 @@ window.simpleFacebookLogin = async function() {
             // Carregar SDK diretamente
             await new Promise((resolve, reject) => {
                 window.fbAsyncInit = function() {
+                    // Tentar usar App ID funcional salvo, senão usar o original
+                    const workingAppId = localStorage.getItem('working_facebook_app_id');
+                    const appId = workingAppId || '778309504913999';
+                    
                     FB.init({
-                        appId: '778309504913999',
+                        appId: appId,
                         cookie: true,
                         xfbml: true,
                         version: 'v18.0'
                     });
+                    
+                    console.log(`✅ Facebook SDK inicializado com App ID: ${appId}`);
                     resolve();
                 };
                 
