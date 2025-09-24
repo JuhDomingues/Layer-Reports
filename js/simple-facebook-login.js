@@ -38,7 +38,7 @@ window.simpleFacebookLogin = async function() {
                 console.log('📊 Resposta do login:', response);
                 resolve(response);
             }, {
-                scope: 'ads_read,ads_management,read_insights,business_management',
+                scope: 'email,public_profile',
                 return_scopes: true,
                 auth_type: 'rerequest'
             });

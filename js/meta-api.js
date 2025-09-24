@@ -22,7 +22,7 @@ class MetaAdsAPI {
         this.accessToken = localStorage.getItem('facebook_access_token');
         this.accountId = localStorage.getItem('facebook_account_id');
         this.isSDKLoaded = false;
-        this.requiredPermissions = ['ads_read', 'ads_management', 'read_insights', 'business_management'];
+        this.requiredPermissions = ['email', 'public_profile'];
         this.user = null;
         this.connectionStatus = 'disconnected'; // 'disconnected', 'connecting', 'connected'
         this.isHttps = isHttps;
