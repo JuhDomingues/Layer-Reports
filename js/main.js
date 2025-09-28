@@ -25,6 +25,7 @@ class MetaAdsInsights {
             name: '',
             exactMatch: false
         };
+        this.isFixedConfiguration = localStorage.getItem('is_fixed_configuration') === 'true';
         
         this.init();
     }
@@ -43,6 +44,7 @@ class MetaAdsInsights {
         this.selectedBusinessManagerId = this.api.FIXED_BUSINESS_MANAGER_ID;
         this.selectedAccountId = this.api.FIXED_ACCOUNT_ID;
         this.api.accountId = this.selectedAccountId;
+        this.isFixedConfiguration = true; // Flag para indicar configuração fixa
         
         // Salvar no localStorage
         localStorage.setItem('selected_business_manager', JSON.stringify({
@@ -51,16 +53,27 @@ class MetaAdsInsights {
         }));
         localStorage.setItem('selected_account_id', this.selectedAccountId);
         localStorage.setItem('selected_account_name', this.api.FIXED_ACCOUNT_NAME);
+        localStorage.setItem('is_fixed_configuration', 'true');
         
         console.log('🎯 Configuração fixa aplicada:');
         console.log('  - Business Manager:', this.selectedBusinessManagerId);
         console.log('  - Conta:', this.selectedAccountId);
+        console.log('  - Modo fixo ativo: sempre usar dados demo');
         
         // Atualizar interface
         this.updateFixedSelectors();
     }
 
     updateFixedSelectors() {
+        // Forçar modo demo e desabilitar seletor
+        const apiModeSelector = document.getElementById('apiMode');
+        if (apiModeSelector) {
+            apiModeSelector.value = 'demo';
+            apiModeSelector.disabled = true;
+            apiModeSelector.style.opacity = '0.6';
+            apiModeSelector.style.cursor = 'not-allowed';
+        }
+
         // Atualizar seletor de Business Manager
         const bmSelector = document.getElementById('businessManagerFilter');
         if (bmSelector) {
@@ -75,6 +88,12 @@ class MetaAdsInsights {
             accountSelector.innerHTML = '<option value="' + this.selectedAccountId + '">' + this.api.FIXED_ACCOUNT_NAME + '</option>';
             accountSelector.value = this.selectedAccountId;
             accountSelector.style.display = 'none'; // Esconder seletor já que é fixo
+        }
+
+        // Esconder botão de login do Facebook
+        const facebookLoginBtn = document.getElementById('facebookLoginBtn');
+        if (facebookLoginBtn) {
+            facebookLoginBtn.style.display = 'none';
         }
 
         // Mostrar informação fixa na interface
@@ -912,6 +931,14 @@ class MetaAdsInsights {
     async handleModeChange(event) {
         const newMode = event.target.value;
         const oldMode = this.api.mode;
+        
+        // Se configuração fixa estiver ativa, forçar modo demo
+        if (this.isFixedConfiguration || localStorage.getItem('is_fixed_configuration') === 'true') {
+            console.log('🎯 Configuração fixa ativa - mantendo modo demo');
+            event.target.value = 'demo';
+            this.showSuccess('Layer Reports configurado para usar dados fixos');
+            return;
+        }
         
         if (newMode === oldMode) return;
         
@@ -2008,6 +2035,21 @@ class MetaAdsInsights {
 
     async loadRealData() {
         console.log('🔍 loadRealData started with selectedAccountId:', this.selectedAccountId);
+        
+        // Se estiver em configuração fixa, usar sempre dados demo
+        if (this.isFixedConfiguration || localStorage.getItem('is_fixed_configuration') === 'true') {
+            console.log('🎯 Configuração fixa detectada - usando dados demo');
+            this.showLoading('Carregando dados da Layer Reports...');
+            await this.sleep(1500);
+            this.data = this.generateMockData();
+            this.allCampaigns = [...this.data.campaigns];
+            this.updateKPIs();
+            this.updateCampaignsTable();
+            this.updateCharts();
+            this.hideLoading();
+            this.showSuccess('Dados da Layer Reports carregados com sucesso!');
+            return;
+        }
         
         try {
             if (!this.selectedAccountId) {

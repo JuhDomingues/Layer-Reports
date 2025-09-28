@@ -57,6 +57,23 @@ window.AccountManager = {
     async loadDataWithAccount() {
         console.log('📊 === CARREGANDO DADOS COM CONTA SELECIONADA ===');
         
+        // Se estiver em configuração fixa, usar dados demo
+        if (localStorage.getItem('is_fixed_configuration') === 'true') {
+            console.log('🎯 Configuração fixa detectada - usando dados demo da Layer Reports');
+            if (window.metaAdsApp) {
+                window.metaAdsApp.showLoading('Carregando dados da Layer Reports...');
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                window.metaAdsApp.data = window.metaAdsApp.generateMockData();
+                window.metaAdsApp.allCampaigns = [...window.metaAdsApp.data.campaigns];
+                window.metaAdsApp.updateKPIs();
+                window.metaAdsApp.updateCampaignsTable();
+                window.metaAdsApp.updateCharts();
+                window.metaAdsApp.hideLoading();
+                window.metaAdsApp.showSuccess('Dados da Layer Reports carregados!');
+            }
+            return true;
+        }
+        
         try {
             // Primeiro buscar e selecionar conta
             const accountId = await this.autoSelectAccount();
