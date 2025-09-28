@@ -679,7 +679,7 @@
     // Mostrar seletor de contas com token fixo
     async function showAdAccountsSelectorWithToken() {
         const FIXED_BM_ID = '177341406299126';
-        const ACCESS_TOKEN = 'SEU_TOKEN_AQUI'; // TODO: Adicionar token real
+        const ACCESS_TOKEN = 'EAALD3k2Q0k8BPmrnpMUoCVolCZCQX8ooJMpq4Q6828ryH3Dx3XtWMUGMbVdPRpSWWCR31opwrsKNCVSsAZBYCRmFJlSzG5nXl26vVNY3q9QaULNdDN4La3ASD1ZCcimc7uU2ClOyrsIxxYH0kBkH7bE5e5baByX2VkbeOrgM7KAZAAQqn2NENC33me3AdKfOjpZC4';
         
         try {
             showLoadingModal('Buscando contas de anúncios do Business Manager...');
