@@ -46,6 +46,7 @@ class MetaAdsInsights {
             await this.sleep(1500);
             this.data = this.generateMockData();
             this.allCampaigns = [...this.data.campaigns];
+            this.populateCampaignFilter();
             this.updateKPIs();
             this.updateCampaignsTable();
             this.updateCharts();
@@ -61,6 +62,7 @@ class MetaAdsInsights {
             await this.sleep(1500);
             this.data = this.generateMockData();
             this.allCampaigns = [...this.data.campaigns];
+            this.populateCampaignFilter();
             this.updateKPIs();
             this.updateCampaignsTable();
             this.hideLoading();
@@ -785,9 +787,20 @@ class MetaAdsInsights {
         
         // Apply campaign filter
         if (this.currentCampaignFilter !== 'all') {
-            filteredCampaigns = filteredCampaigns.filter(campaign => 
-                campaign.status === this.currentCampaignFilter
-            );
+            // Verificar se é filtro por status ou por nome de campanha
+            const statusFilters = ['active', 'paused', 'inactive'];
+            
+            if (statusFilters.includes(this.currentCampaignFilter)) {
+                // Filtrar por status
+                filteredCampaigns = filteredCampaigns.filter(campaign => 
+                    campaign.status === this.currentCampaignFilter
+                );
+            } else {
+                // Filtrar por nome específico da campanha
+                filteredCampaigns = filteredCampaigns.filter(campaign => 
+                    campaign.name === this.currentCampaignFilter
+                );
+            }
         }
         
         // Update data with filtered campaigns
@@ -798,6 +811,56 @@ class MetaAdsInsights {
         this.updateKPIs();
         this.updateCampaignsTable();
         this.updateCharts();
+    }
+
+    populateCampaignFilter() {
+        const campaignSelect = document.getElementById('campaignFilter');
+        if (!campaignSelect || !this.allCampaigns) return;
+
+        // Limpar opções existentes
+        campaignSelect.innerHTML = '';
+
+        // Adicionar opção "Todas as campanhas"
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'Todas as campanhas';
+        campaignSelect.appendChild(allOption);
+
+        // Adicionar separador visual
+        const separatorOption = document.createElement('option');
+        separatorOption.disabled = true;
+        separatorOption.textContent = '──────────────';
+        campaignSelect.appendChild(separatorOption);
+
+        // Adicionar cada campanha específica
+        this.allCampaigns.forEach(campaign => {
+            const option = document.createElement('option');
+            option.value = campaign.name; // Usar nome como valor
+            option.textContent = campaign.name;
+            campaignSelect.appendChild(option);
+        });
+
+        // Adicionar separador antes dos filtros por status
+        const separatorOption2 = document.createElement('option');
+        separatorOption2.disabled = true;
+        separatorOption2.textContent = '── Por Status ──';
+        campaignSelect.appendChild(separatorOption2);
+
+        // Adicionar filtros por status
+        const statusFilters = [
+            { value: 'active', text: 'Apenas ativas' },
+            { value: 'paused', text: 'Apenas pausadas' },
+            { value: 'inactive', text: 'Apenas inativas' }
+        ];
+
+        statusFilters.forEach(filter => {
+            const option = document.createElement('option');
+            option.value = filter.value;
+            option.textContent = filter.text;
+            campaignSelect.appendChild(option);
+        });
+
+        console.log('🎯 Filtro de campanhas populado com', this.allCampaigns.length, 'campanhas');
     }
 
     handleCustomDateApply() {
