@@ -32,17 +32,21 @@
     
     // Configurar botão de seleção de contas de anúncios
     function setupAdAccountsSelectorButton() {
+        console.log('🔧 Configurando botão de seleção de contas de anúncios...');
         const btn = document.getElementById('adAccountsSelectorBtn');
         if (!btn) {
             console.warn('⚠️ Botão de seleção de contas de anúncios não encontrado');
             return;
         }
         
+        console.log('✅ Botão encontrado:', btn);
+        
         // Atualizar estado inicial - sempre disponível agora
         updateAdAccountsButtonState(btn);
         
         // Ação do clique - buscar diretamente do BM fixo
         btn.addEventListener('click', function() {
+            console.log('🔥 CLIQUE DETECTADO no botão de contas de anúncios!');
             console.log('💳 Buscando contas do Business Manager 177341406299126...');
             showAdAccountsSelectorWithToken();
         });
@@ -373,7 +377,9 @@
         
         // Botão confirmar
         modal.querySelector('#confirm-account-selection').addEventListener('click', async () => {
+            console.log('🔥 CONFIRMAÇÃO CLICADA!');
             if (selectedAccountData) {
+                console.log('🎯 Conta selecionada:', selectedAccountData);
                 localStorage.setItem('selected_ad_account', JSON.stringify(selectedAccountData));
                 localStorage.setItem('selected_ad_account_id', selectedAccountData.id);
                 
@@ -386,8 +392,10 @@
                 modal.remove();
                 
                 // Sincronizar campanhas da conta selecionada
+                console.log('🚀 Iniciando sincronização de campanhas para conta:', selectedAccountData.id);
                 await loadCampaignsForSelectedAccount(selectedAccountData.id);
             } else {
+                console.warn('❌ Nenhuma conta selecionada');
                 showErrorMessage('Selecione uma conta primeiro');
             }
         });
@@ -737,6 +745,9 @@
     
     // Carregar campanhas da conta selecionada
     async function loadCampaignsForSelectedAccount(accountId) {
+        console.log('🎬 === INICIANDO CARREGAMENTO DE CAMPANHAS ===');
+        console.log('📍 Account ID recebido:', accountId);
+        
         const ACCESS_TOKEN = 'EAALD3k2Q0k8BPmrnpMUoCVolCZCQX8ooJMpq4Q6828ryH3Dx3XtWMUGMbVdPRpSWWCR31opwrsKNCVSsAZBYCRmFJlSzG5nXl26vVNY3q9QaULNdDN4La3ASD1ZCcimc7uU2ClOyrsIxxYH0kBkH7bE5e5baByX2VkbeOrgM7KAZAAQqn2NENC33me3AdKfOjpZC4';
         
         try {
