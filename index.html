@@ -72,6 +72,11 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     
+                    <button class="facebook-connect-btn" id="facebookConnectBtn">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Conectar API</span>
+                    </button>
+                    
                     <div class="user-menu">
                         <img src="https://ui-avatars.com/api/?name=User&background=1877f2&color=fff" alt="User" class="user-avatar" id="userAvatar">
                         <span class="user-name" id="userName">Usuário Demo</span>
@@ -224,43 +229,6 @@
                             </div>
                         </div>
                         
-                        <!-- Nova área de controles -->
-                        <div class="table-filters">
-                            <!-- Controles de filtros -->
-                            <div class="filter-controls">
-                                <button class="advanced-filters-btn" id="advancedFiltersBtn">
-                                    <i class="fas fa-sliders-h"></i>
-                                    Filtros Avançados
-                                </button>
-                                
-                                <div class="date-range-picker">
-                                    <i class="fas fa-calendar"></i>
-                                    <select id="dateRange">
-                                        <option value="7">Últimos 7 dias</option>
-                                        <option value="30" selected>Últimos 30 dias</option>
-                                        <option value="90">Últimos 90 dias</option>
-                                        <option value="custom">Período personalizado</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="custom-date-picker" id="customDatePicker" style="display: none;">
-                                    <div class="date-inputs">
-                                        <div class="date-input-group">
-                                            <label for="startDate">De:</label>
-                                            <input type="date" id="startDate" class="date-input">
-                                        </div>
-                                        <div class="date-input-group">
-                                            <label for="endDate">Até:</label>
-                                            <input type="date" id="endDate" class="date-input">
-                                        </div>
-                                        <button class="apply-date-btn" id="applyCustomDate">
-                                            <i class="fas fa-check"></i>
-                                            Aplicar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         
                         <div class="table-wrapper">
                             <table class="data-table" id="campaignsTable">
@@ -474,6 +442,38 @@
             <i class="fab fa-facebook-f"></i>
             <span class="btn-text">Conectar Facebook</span>
         </button>
+        
+        <!-- Filtros Avançados e Date Range -->
+        <button class="advanced-filters-btn" id="advancedFiltersBtn">
+            <i class="fas fa-sliders-h"></i>
+            Filtros Avançados
+        </button>
+        
+        <div class="date-range-picker">
+            <select id="dateRange">
+                <option value="7">Últimos 7 dias</option>
+                <option value="30" selected>Últimos 30 dias</option>
+                <option value="90">Últimos 90 dias</option>
+                <option value="custom">Período personalizado</option>
+            </select>
+        </div>
+        
+        <div class="custom-date-picker" id="customDatePicker">
+            <div class="date-inputs">
+                <div class="date-input-group">
+                    <label for="startDate">De:</label>
+                    <input type="date" id="startDate" class="date-input">
+                </div>
+                <div class="date-input-group">
+                    <label for="endDate">Até:</label>
+                    <input type="date" id="endDate" class="date-input">
+                </div>
+                <button class="apply-date-btn" id="applyCustomDate">
+                    <i class="fas fa-check"></i>
+                    Aplicar
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Desabilitados temporariamente para evitar conflitos -->
@@ -506,9 +506,10 @@
     <script src="js/business-manager-selector.js"></script>
     <script src="js/token-manager.js"></script>
     <script src="js/campaign-filters.js"></script>
-    <script src="js/filter-button.js"></script>
-    <script src="js/account-selector-button.js"></script>
+    <!-- <script src="js/filter-button.js"></script> -->
+    <!-- <script src="js/account-selector-button.js"></script> -->
     <script src="js/clean-interface.js"></script>
+    <script src="js/connect-facebook-api.js"></script>
     <!-- <script src="js/quick-access.js"></script> -->
     <!-- <script src="js/clean-init.js"></script> -->
     <!-- <script src="js/emergency-button.js"></script> -->
