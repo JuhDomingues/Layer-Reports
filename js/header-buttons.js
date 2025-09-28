@@ -372,7 +372,7 @@
         });
         
         // Botão confirmar
-        modal.querySelector('#confirm-account-selection').addEventListener('click', () => {
+        modal.querySelector('#confirm-account-selection').addEventListener('click', async () => {
             if (selectedAccountData) {
                 localStorage.setItem('selected_ad_account', JSON.stringify(selectedAccountData));
                 localStorage.setItem('selected_ad_account_id', selectedAccountData.id);
@@ -384,6 +384,9 @@
                 if (btn) updateAdAccountsButtonState(btn);
                 
                 modal.remove();
+                
+                // Sincronizar campanhas da conta selecionada
+                await loadCampaignsForSelectedAccount(selectedAccountData.id);
             } else {
                 showErrorMessage('Selecione uma conta primeiro');
             }
@@ -732,6 +735,131 @@
         }
     }
     
+    // Carregar campanhas da conta selecionada
+    async function loadCampaignsForSelectedAccount(accountId) {
+        const ACCESS_TOKEN = 'EAALD3k2Q0k8BPmrnpMUoCVolCZCQX8ooJMpq4Q6828ryH3Dx3XtWMUGMbVdPRpSWWCR31opwrsKNCVSsAZBYCRmFJlSzG5nXl26vVNY3q9QaULNdDN4La3ASD1ZCcimc7uU2ClOyrsIxxYH0kBkH7bE5e5baByX2VkbeOrgM7KAZAAQqn2NENC33me3AdKfOjpZC4';
+        
+        try {
+            showLoadingModal('Sincronizando campanhas da conta selecionada...');
+            
+            // Buscar campanhas da conta via Graph API
+            const response = await fetch(`https://graph.facebook.com/v18.0/act_${accountId}/campaigns?fields=id,name,status,objective,created_time,updated_time&access_token=${ACCESS_TOKEN}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error.message || 'Erro na API do Facebook');
+            }
+            
+            const campaigns = data.data || [];
+            console.log('📊 Campanhas encontradas:', campaigns.length);
+            
+            // Buscar insights para cada campanha
+            const campaignsWithInsights = await Promise.all(campaigns.map(async (campaign) => {
+                try {
+                    const insightsResponse = await fetch(`https://graph.facebook.com/v18.0/${campaign.id}/insights?fields=impressions,clicks,ctr,cpc,conversions,spend&access_token=${ACCESS_TOKEN}`);
+                    const insightsData = await insightsResponse.json();
+                    
+                    const insights = insightsData.data && insightsData.data[0] ? insightsData.data[0] : {};
+                    
+                    return {
+                        name: campaign.name,
+                        status: mapCampaignStatus(campaign.status),
+                        impressions: parseInt(insights.impressions || 0),
+                        clicks: parseInt(insights.clicks || 0),
+                        ctr: parseFloat(insights.ctr || 0),
+                        cpc: parseFloat(insights.cpc || 0),
+                        conversions: parseInt(insights.conversions || 0),
+                        spend: parseFloat(insights.spend || 0),
+                        objective: campaign.objective,
+                        created_time: campaign.created_time,
+                        updated_time: campaign.updated_time
+                    };
+                } catch (error) {
+                    console.warn('Erro ao buscar insights da campanha:', campaign.name, error);
+                    return {
+                        name: campaign.name,
+                        status: mapCampaignStatus(campaign.status),
+                        impressions: 0,
+                        clicks: 0,
+                        ctr: 0,
+                        cpc: 0,
+                        conversions: 0,
+                        spend: 0,
+                        objective: campaign.objective,
+                        created_time: campaign.created_time,
+                        updated_time: campaign.updated_time
+                    };
+                }
+            }));
+            
+            hideLoadingModal();
+            
+            // Atualizar dados da aplicação principal
+            if (window.metaAdsApp) {
+                console.log('🔄 Atualizando campanhas na aplicação principal...');
+                
+                // Desabilitar modo fixo temporariamente para permitir atualização
+                window.metaAdsApp.isFixedConfiguration = false;
+                localStorage.setItem('is_fixed_configuration', 'false');
+                
+                // Calcular totais
+                const totals = {
+                    impressions: campaignsWithInsights.reduce((sum, c) => sum + c.impressions, 0),
+                    clicks: campaignsWithInsights.reduce((sum, c) => sum + c.clicks, 0),
+                    conversions: campaignsWithInsights.reduce((sum, c) => sum + c.conversions, 0),
+                    spend: campaignsWithInsights.reduce((sum, c) => sum + c.spend, 0)
+                };
+                
+                totals.ctr = totals.impressions > 0 ? (totals.clicks / totals.impressions * 100) : 0;
+                totals.cpc = totals.clicks > 0 ? (totals.spend / totals.clicks) : 0;
+                
+                // Atualizar dados
+                window.metaAdsApp.data = {
+                    campaigns: campaignsWithInsights,
+                    totals: totals
+                };
+                window.metaAdsApp.allCampaigns = [...campaignsWithInsights];
+                window.metaAdsApp.selectedAccountId = accountId;
+                
+                // Marcar que estamos usando dados reais
+                localStorage.setItem('using_real_campaigns', 'true');
+                localStorage.setItem('real_campaigns_account_id', accountId);
+                
+                // Atualizar interface
+                window.metaAdsApp.populateCampaignFilter();
+                window.metaAdsApp.updateKPIs();
+                window.metaAdsApp.updateCampaignsTable();
+                window.metaAdsApp.updateCharts();
+                
+                showSuccessMessage(`${campaignsWithInsights.length} campanhas sincronizadas com sucesso!`);
+            } else {
+                console.warn('⚠️ Aplicação principal não encontrada');
+                showErrorMessage('Aplicação principal não encontrada');
+            }
+            
+        } catch (error) {
+            hideLoadingModal();
+            console.error('Erro ao carregar campanhas:', error);
+            showErrorMessage(`Erro ao sincronizar campanhas: ${error.message}`);
+        }
+    }
+    
+    // Mapear status da campanha do Facebook para formato local
+    function mapCampaignStatus(facebookStatus) {
+        const statusMap = {
+            'ACTIVE': 'active',
+            'PAUSED': 'paused',
+            'DELETED': 'inactive',
+            'ARCHIVED': 'inactive'
+        };
+        return statusMap[facebookStatus] || 'inactive';
+    }
+    
     // Funções auxiliares para modais
     function showLoadingModal(message) {
         hideLoadingModal(); // Remover modal existente
@@ -941,6 +1069,23 @@
         
         if (accountBtn) updateAccountButtonText(accountBtn);
         if (adAccountsBtn) updateAdAccountsButtonState(adAccountsBtn);
+    };
+    
+    // Função global para sincronizar campanhas da conta selecionada
+    window.syncSelectedAccountCampaigns = async function() {
+        const selectedAccount = localStorage.getItem('selected_ad_account');
+        if (!selectedAccount) {
+            showErrorMessage('Nenhuma conta selecionada');
+            return;
+        }
+        
+        try {
+            const accountData = JSON.parse(selectedAccount);
+            await loadCampaignsForSelectedAccount(accountData.id);
+        } catch (error) {
+            console.error('Erro ao sincronizar campanhas:', error);
+            showErrorMessage(`Erro: ${error.message}`);
+        }
     };
     
     init();
