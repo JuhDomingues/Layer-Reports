@@ -27,7 +27,44 @@ class MetaAdsInsights {
         };
         this.isFixedConfiguration = localStorage.getItem('is_fixed_configuration') === 'true';
         
+        // Se configuração fixa estiver ativa, sobrescrever métodos críticos
+        if (this.isFixedConfiguration) {
+            this.overrideForFixedMode();
+        }
+        
         this.init();
+    }
+
+    overrideForFixedMode() {
+        console.log('🎯 Ativando modo de override para configuração fixa');
+        
+        // Sobrescrever completamente loadRealData
+        const originalLoadRealData = this.loadRealData.bind(this);
+        this.loadRealData = async () => {
+            console.log('🎯 loadRealData interceptado - usando dados demo da Layer Reports');
+            this.showLoading('Carregando dados da Layer Reports...');
+            await this.sleep(1500);
+            this.data = this.generateMockData();
+            this.allCampaigns = [...this.data.campaigns];
+            this.updateKPIs();
+            this.updateCampaignsTable();
+            this.updateCharts();
+            this.hideLoading();
+            this.showSuccess('Dados da Layer Reports carregados!');
+        };
+        
+        // Sobrescrever método de carregamento inicial para garantir
+        const originalLoadInitialData = this.loadInitialData.bind(this);
+        this.loadInitialData = async () => {
+            console.log('🎯 loadInitialData interceptado - usando dados demo da Layer Reports');
+            this.showLoading('Carregando dados da Layer Reports...');
+            await this.sleep(1500);
+            this.data = this.generateMockData();
+            this.allCampaigns = [...this.data.campaigns];
+            this.updateKPIs();
+            this.updateCampaignsTable();
+            this.hideLoading();
+        };
     }
 
     async init() {

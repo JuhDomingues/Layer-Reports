@@ -17,6 +17,13 @@ class MetaAdsAPI {
         this.FIXED_ACCOUNT_ID = 'act_4030832237237833';
         this.FIXED_ACCOUNT_NAME = 'Conta Principal - Layer Reports';
         
+        // Se configuração fixa estiver ativa, forçar modo demo SEMPRE
+        if (localStorage.getItem('is_fixed_configuration') === 'true') {
+            this.mode = 'demo';
+            localStorage.setItem('api_mode', 'demo');
+            console.log('🎯 Configuração fixa detectada - modo demo forçado');
+        }
+        
         // Initialize error handler and connection monitor
         this.errorHandler = new APIErrorHandler();
         this.connectionMonitor = new ConnectionMonitor();
@@ -41,6 +48,14 @@ class MetaAdsAPI {
 
     // Alternar modo API
     setMode(mode) {
+        // Se configuração fixa estiver ativa, forçar modo demo
+        if (localStorage.getItem('is_fixed_configuration') === 'true') {
+            console.log('🎯 Configuração fixa ativa - forçando modo demo');
+            this.mode = 'demo';
+            localStorage.setItem('api_mode', 'demo');
+            return true;
+        }
+        
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         if (mode === 'real' && !this.isHttps && !isLocalhost) {
             console.warn('⚠️ Modo real requer HTTPS. Mantendo modo demo.');
@@ -375,6 +390,12 @@ class MetaAdsAPI {
     
     // Buscar campanhas (híbrido)
     async getCampaigns(accountId, filters = {}) {
+        // Se configuração fixa estiver ativa, SEMPRE usar dados demo
+        if (localStorage.getItem('is_fixed_configuration') === 'true') {
+            console.log('🎯 Configuração fixa detectada - retornando campanhas demo da Layer Reports');
+            return this.getDemoCampaigns(filters);
+        }
+        
         if (this.mode === 'demo') {
             return this.getDemoCampaigns(filters);
         }
@@ -382,11 +403,59 @@ class MetaAdsAPI {
     }
 
     getDemoCampaigns(filters) {
-        // Basic demo campaigns
-        return new Promise(resolve => setTimeout(() => resolve({ data: [
-            { id: 'demo_camp_1', name: 'Campanha Demo 1', status: 'ACTIVE', objective: 'CONVERSIONS' },
-            { id: 'demo_camp_2', name: 'Campanha Demo 2', status: 'PAUSED', objective: 'TRAFFIC' }
-        ]}), 500));
+        // Layer Reports específicas campanhas
+        const layerCampaigns = [
+            { 
+                id: 'layer_001', 
+                name: 'Layer Reports - Dashboard Premium', 
+                status: 'ACTIVE', 
+                objective: 'CONVERSIONS',
+                account_id: this.FIXED_ACCOUNT_ID,
+                business_manager_id: this.FIXED_BUSINESS_MANAGER_ID
+            },
+            { 
+                id: 'layer_002', 
+                name: 'Layer - Relatórios Meta Ads', 
+                status: 'ACTIVE', 
+                objective: 'TRAFFIC',
+                account_id: this.FIXED_ACCOUNT_ID,
+                business_manager_id: this.FIXED_BUSINESS_MANAGER_ID
+            },
+            { 
+                id: 'layer_003', 
+                name: 'Dashboard Analytics - Retargeting', 
+                status: 'ACTIVE', 
+                objective: 'CONVERSIONS',
+                account_id: this.FIXED_ACCOUNT_ID,
+                business_manager_id: this.FIXED_BUSINESS_MANAGER_ID
+            },
+            { 
+                id: 'layer_004', 
+                name: 'Layer Reports - Brand Awareness', 
+                status: 'ACTIVE', 
+                objective: 'BRAND_AWARENESS',
+                account_id: this.FIXED_ACCOUNT_ID,
+                business_manager_id: this.FIXED_BUSINESS_MANAGER_ID
+            },
+            { 
+                id: 'layer_005', 
+                name: 'Meta Ads Insights - Lookalike', 
+                status: 'PAUSED', 
+                objective: 'CONVERSIONS',
+                account_id: this.FIXED_ACCOUNT_ID,
+                business_manager_id: this.FIXED_BUSINESS_MANAGER_ID
+            },
+            { 
+                id: 'layer_006', 
+                name: 'Layer - Teste A/B Dashboard', 
+                status: 'ACTIVE', 
+                objective: 'TRAFFIC',
+                account_id: this.FIXED_ACCOUNT_ID,
+                business_manager_id: this.FIXED_BUSINESS_MANAGER_ID
+            }
+        ];
+        
+        return new Promise(resolve => setTimeout(() => resolve({ data: layerCampaigns }), 300));
     }
 
     async getRealCampaigns(accountId, filters) {
@@ -429,6 +498,12 @@ class MetaAdsAPI {
 
     // Buscar insights/métricas (híbrido)
     async getInsights(objectId, dateRange = '30') {
+        // Se configuração fixa estiver ativa, SEMPRE usar dados demo
+        if (localStorage.getItem('is_fixed_configuration') === 'true') {
+            console.log('🎯 Configuração fixa detectada - retornando insights demo da Layer Reports');
+            return this.getDemoInsights(objectId);
+        }
+        
         if (this.mode === 'demo') {
             return this.getDemoInsights(objectId);
         }
