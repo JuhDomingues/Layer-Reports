@@ -138,30 +138,9 @@ class MetaAdsInsights {
     }
 
     showFixedAccountInfo() {
-        // Criar elemento de informação sobre conta fixa
-        const headerRight = document.querySelector('.header-right');
-        if (headerRight) {
-            let fixedInfo = document.getElementById('fixed-account-info');
-            if (!fixedInfo) {
-                fixedInfo = document.createElement('div');
-                fixedInfo.id = 'fixed-account-info';
-                fixedInfo.style.cssText = `
-                    background: #e3f2fd;
-                    color: #1565c0;
-                    padding: 8px 12px;
-                    border-radius: 6px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    margin-right: 10px;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    border: 1px solid #bbdefb;
-                `;
-                fixedInfo.innerHTML = '<i class="fas fa-lock" style="font-size: 10px;"></i>Layer Reports - Conta Principal';
-                headerRight.insertBefore(fixedInfo, headerRight.firstChild);
-            }
-        }
+        // As informações fixas agora estão na nova área de filtros da tabela
+        // Não precisamos mais criar elementos no header
+        console.log('🎯 Informações da conta fixa já estão na área de filtros da tabela');
     }
 
     async checkExistingAuth() {

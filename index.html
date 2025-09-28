@@ -68,80 +68,6 @@
                 </div>
                 
                 <div class="header-right">
-                    <div class="api-mode-selector">
-                        <i class="fas fa-toggle-on"></i>
-                        <select id="apiMode" class="mode-select">
-                            <option value="demo">📊 Modo Demo</option>
-                            <option value="real">🔗 API Real</option>
-                        </select>
-                    </div>
-                    
-                    <div class="api-status" id="apiStatus">
-                        <span class="status-indicator demo" id="statusIndicator"></span>
-                        <span class="status-text" id="statusText">Modo Demo</span>
-                    </div>
-                    
-                    <button class="facebook-login-btn" id="facebookLoginBtn" title="Conecte com sua conta do Facebook para acessar dados reais de campanhas">
-                        <i class="fab fa-facebook-f"></i>
-                        <span class="btn-text">Conectar Facebook</span>
-                    </button>
-                    
-                    <div class="business-manager-selector" id="businessManagerSelector" style="display: none;">
-                        <i class="fas fa-building"></i>
-                        <select id="businessManagerFilter">
-                            <option value="all">Todos os Business Managers</option>
-                        </select>
-                    </div>
-                    
-                    <div class="account-selector" id="accountSelector" style="display: none;">
-                        <i class="fas fa-credit-card"></i>
-                        <select id="accountFilter">
-                            <option value="all">Todas as contas</option>
-                        </select>
-                    </div>
-                    
-                    <div class="campaign-filter">
-                        <i class="fas fa-filter"></i>
-                        <select id="campaignFilter">
-                            <option value="all">Todas as campanhas</option>
-                            <option value="active">Apenas ativas</option>
-                            <option value="paused">Apenas pausadas</option>
-                            <option value="inactive">Apenas inativas</option>
-                        </select>
-                    </div>
-                    
-                    <button class="advanced-filters-btn" id="advancedFiltersBtn">
-                        <i class="fas fa-sliders-h"></i>
-                        Filtros Avançados
-                    </button>
-                    
-                    <div class="date-range-picker">
-                        <i class="fas fa-calendar"></i>
-                        <select id="dateRange">
-                            <option value="7">Últimos 7 dias</option>
-                            <option value="30" selected>Últimos 30 dias</option>
-                            <option value="90">Últimos 90 dias</option>
-                            <option value="custom">Período personalizado</option>
-                        </select>
-                    </div>
-                    
-                    <div class="custom-date-picker" id="customDatePicker" style="display: none;">
-                        <div class="date-inputs">
-                            <div class="date-input-group">
-                                <label for="startDate">De:</label>
-                                <input type="date" id="startDate" class="date-input">
-                            </div>
-                            <div class="date-input-group">
-                                <label for="endDate">Até:</label>
-                                <input type="date" id="endDate" class="date-input">
-                            </div>
-                            <button class="apply-date-btn" id="applyCustomDate">
-                                <i class="fas fa-check"></i>
-                                Aplicar
-                            </button>
-                        </div>
-                    </div>
-                    
                     <button class="refresh-btn" id="refreshData">
                         <i class="fas fa-sync-alt"></i>
                     </button>
@@ -279,6 +205,17 @@
                         <div class="table-header">
                             <h3>Campanhas Detalhadas</h3>
                             <div class="table-controls">
+                                <!-- Novo filtro de campanhas -->
+                                <div class="campaign-filter">
+                                    <i class="fas fa-filter"></i>
+                                    <select id="campaignFilter">
+                                        <option value="all">Todas as campanhas</option>
+                                        <option value="active">Apenas ativas</option>
+                                        <option value="paused">Apenas pausadas</option>
+                                        <option value="inactive">Apenas inativas</option>
+                                    </select>
+                                </div>
+                                
                                 <div class="search-box">
                                     <i class="fas fa-search"></i>
                                     <input type="text" placeholder="Buscar campanhas..." id="searchCampaigns">
@@ -287,6 +224,60 @@
                                     <i class="fas fa-download"></i>
                                     Exportar
                                 </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Nova área de controles -->
+                        <div class="table-filters">
+                            <!-- Informações da conta fixa -->
+                            <div class="account-info">
+                                <div class="account-badge">
+                                    <i class="fas fa-building"></i>
+                                    <span>Dr. Santiago Vecina - Layer Reports</span>
+                                </div>
+                                <div class="premium-badge">
+                                    <i class="fas fa-crown"></i>
+                                    <span>Modo Premium Ativo</span>
+                                </div>
+                                <div class="filters-count">
+                                    <i class="fas fa-filter"></i>
+                                    <span>Filtros (6)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Controles de filtros -->
+                            <div class="filter-controls">
+                                <button class="advanced-filters-btn" id="advancedFiltersBtn">
+                                    <i class="fas fa-sliders-h"></i>
+                                    Filtros Avançados
+                                </button>
+                                
+                                <div class="date-range-picker">
+                                    <i class="fas fa-calendar"></i>
+                                    <select id="dateRange">
+                                        <option value="7">Últimos 7 dias</option>
+                                        <option value="30" selected>Últimos 30 dias</option>
+                                        <option value="90">Últimos 90 dias</option>
+                                        <option value="custom">Período personalizado</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="custom-date-picker" id="customDatePicker" style="display: none;">
+                                    <div class="date-inputs">
+                                        <div class="date-input-group">
+                                            <label for="startDate">De:</label>
+                                            <input type="date" id="startDate" class="date-input">
+                                        </div>
+                                        <div class="date-input-group">
+                                            <label for="endDate">Até:</label>
+                                            <input type="date" id="endDate" class="date-input">
+                                        </div>
+                                        <button class="apply-date-btn" id="applyCustomDate">
+                                            <i class="fas fa-check"></i>
+                                            Aplicar
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -465,6 +456,43 @@
                 <button class="btn btn-primary" id="applyAdvancedFilters">Aplicar Filtros</button>
             </div>
         </div>
+    </div>
+
+    <!-- Elementos escondidos para compatibilidade com JavaScript -->
+    <div style="display: none;">
+        <!-- API Mode Selector -->
+        <div class="api-mode-selector">
+            <select id="apiMode" class="mode-select">
+                <option value="demo">📊 Modo Demo</option>
+                <option value="real">🔗 API Real</option>
+            </select>
+        </div>
+        
+        <!-- API Status -->
+        <div class="api-status" id="apiStatus">
+            <span class="status-indicator demo" id="statusIndicator"></span>
+            <span class="status-text" id="statusText">Modo Demo</span>
+        </div>
+        
+        <!-- Business Manager Selector -->
+        <div class="business-manager-selector" id="businessManagerSelector">
+            <select id="businessManagerFilter">
+                <option value="all">Todos os Business Managers</option>
+            </select>
+        </div>
+        
+        <!-- Account Selector -->
+        <div class="account-selector" id="accountSelector">
+            <select id="accountFilter">
+                <option value="all">Todas as contas</option>
+            </select>
+        </div>
+        
+        <!-- Facebook Login Button -->
+        <button class="facebook-login-btn" id="facebookLoginBtn">
+            <i class="fab fa-facebook-f"></i>
+            <span class="btn-text">Conectar Facebook</span>
+        </button>
     </div>
 
     <!-- Desabilitados temporariamente para evitar conflitos -->
