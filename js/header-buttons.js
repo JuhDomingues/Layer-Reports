@@ -204,15 +204,25 @@
                 return;
             }
             
-            FB.api(`/${bmId}/owned_ad_accounts`, {
-                fields: 'id,name,account_status,currency,business_country_code,timezone_name'
-            }, function(response) {
-                if (response && !response.error) {
-                    const accounts = response.data || [];
-                    localStorage.setItem('available_ad_accounts', JSON.stringify(accounts));
-                    resolve(accounts);
+            // Usar o access token da sessão atual sem sobrescrever
+            FB.getLoginStatus(function(response) {
+                if (response.status === 'connected') {
+                    const accessToken = response.authResponse.accessToken;
+                    
+                    FB.api(`/${bmId}/owned_ad_accounts`, {
+                        fields: 'id,name,account_status,currency,business_country_code,timezone_name',
+                        access_token: accessToken  // Passar token diretamente
+                    }, function(apiResponse) {
+                        if (apiResponse && !apiResponse.error) {
+                            const accounts = apiResponse.data || [];
+                            localStorage.setItem('available_ad_accounts', JSON.stringify(accounts));
+                            resolve(accounts);
+                        } else {
+                            reject(new Error(apiResponse.error?.message || 'Erro ao buscar contas'));
+                        }
+                    });
                 } else {
-                    reject(new Error(response.error?.message || 'Erro ao buscar contas'));
+                    reject(new Error('Usuário não conectado ao Facebook'));
                 }
             });
         });
@@ -502,11 +512,21 @@
     // Buscar Business Managers
     async function fetchBusinessManagers() {
         return new Promise((resolve, reject) => {
-            FB.api('/me/businesses', function(response) {
-                if (response && !response.error) {
-                    resolve(response.data || []);
+            FB.getLoginStatus(function(loginResponse) {
+                if (loginResponse.status === 'connected') {
+                    const accessToken = loginResponse.authResponse.accessToken;
+                    
+                    FB.api('/me/businesses', {
+                        access_token: accessToken  // Passar token diretamente
+                    }, function(response) {
+                        if (response && !response.error) {
+                            resolve(response.data || []);
+                        } else {
+                            reject(new Error(response.error?.message || 'Erro ao buscar Business Managers'));
+                        }
+                    });
                 } else {
-                    reject(new Error(response.error?.message || 'Erro ao buscar Business Managers'));
+                    reject(new Error('Usuário não conectado ao Facebook'));
                 }
             });
         });
@@ -520,14 +540,25 @@
         localStorage.setItem('connected_bm_name', businessManager.name);
         
         // Buscar contas de anúncios do Business Manager
-        return new Promise((resolve, reject) => {
-            FB.api(`/${businessManager.id}/owned_ad_accounts`, function(response) {
-                if (response && !response.error) {
-                    console.log('Contas encontradas:', response.data);
-                    localStorage.setItem('available_ad_accounts', JSON.stringify(response.data));
-                    resolve(response.data);
+        return new Promise((resolve) => {
+            FB.getLoginStatus(function(loginResponse) {
+                if (loginResponse.status === 'connected') {
+                    const accessToken = loginResponse.authResponse.accessToken;
+                    
+                    FB.api(`/${businessManager.id}/owned_ad_accounts`, {
+                        access_token: accessToken  // Passar token diretamente
+                    }, function(response) {
+                        if (response && !response.error) {
+                            console.log('Contas encontradas:', response.data);
+                            localStorage.setItem('available_ad_accounts', JSON.stringify(response.data));
+                            resolve(response.data);
+                        } else {
+                            console.warn('Erro ao buscar contas:', response.error);
+                            resolve([]);
+                        }
+                    });
                 } else {
-                    console.warn('Erro ao buscar contas:', response.error);
+                    console.warn('Usuário não conectado, não é possível buscar contas');
                     resolve([]);
                 }
             });

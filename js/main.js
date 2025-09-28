@@ -564,12 +564,31 @@ class MetaAdsInsights {
     }
 
     setupCharts() {
+        console.log('📊 Configurando gráficos...');
+        
+        // Verificar se os elementos canvas existem antes de inicializar
+        const performanceCanvas = document.getElementById('performanceChart');
+        const campaignsCanvas = document.getElementById('campaignsChart');
+        
+        if (!performanceCanvas || !campaignsCanvas) {
+            console.warn('⚠️ Elementos canvas não encontrados, aguardando DOM...');
+            setTimeout(() => this.setupCharts(), 1000);
+            return;
+        }
+        
         this.setupPerformanceChart();
         this.setupCampaignsChart();
+        
+        console.log('✅ Gráficos configurados com sucesso');
     }
 
     setupPerformanceChart() {
-        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const canvas = document.getElementById('performanceChart');
+        if (!canvas) {
+            console.error('❌ Canvas performanceChart não encontrado');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
         
         // Verificar se dados estão inicializados
         if (!this.data || !this.data.timeSeries) {
@@ -639,7 +658,12 @@ class MetaAdsInsights {
     }
 
     setupCampaignsChart() {
-        const ctx = document.getElementById('campaignsChart').getContext('2d');
+        const canvas = document.getElementById('campaignsChart');
+        if (!canvas) {
+            console.error('❌ Canvas campaignsChart não encontrado');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
         
         // Verificar se dados estão inicializados
         if (!this.data || !this.data.campaigns) {
@@ -913,8 +937,15 @@ class MetaAdsInsights {
     updateCharts() {
         // Verificar se os dados e charts estão inicializados
         if (!this.data || !this.data.timeSeries || !this.charts || !this.charts.performance) {
-            console.warn('⚠️ Charts ou dados não inicializados ainda');
-            return;
+            console.log('📊 Inicializando charts...');
+            
+            // Tentar inicializar os charts se os dados existem
+            if (this.data && this.data.timeSeries) {
+                this.setupCharts();
+            } else {
+                console.warn('⚠️ Dados não disponíveis para inicializar charts');
+                return;
+            }
         }
         
         // Atualizar dados do gráfico de performance
