@@ -753,17 +753,33 @@
         try {
             showLoadingModal('Sincronizando campanhas da conta selecionada...');
             
+            // Garantir que o accountId não tenha 'act_' duplicado
+            const cleanAccountId = accountId.replace('act_', '');
+            const formattedAccountId = `act_${cleanAccountId}`;
+            
+            console.log('🔧 Account ID limpo:', cleanAccountId);
+            console.log('🔧 Account ID formatado:', formattedAccountId);
+            
             // Buscar campanhas da conta via Graph API
-            const response = await fetch(`https://graph.facebook.com/v18.0/act_${accountId}/campaigns?fields=id,name,status,objective,created_time,updated_time&access_token=${ACCESS_TOKEN}`);
+            const url = `https://graph.facebook.com/v18.0/${formattedAccountId}/campaigns?fields=id,name,status,objective,created_time,updated_time&access_token=${ACCESS_TOKEN}`;
+            console.log('🔗 URL da requisição:', url);
+            
+            const response = await fetch(url);
+            console.log('📊 Status da resposta:', response.status);
             
             if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status}`);
+                // Tentar obter mais detalhes do erro
+                const errorText = await response.text();
+                console.error('❌ Detalhes do erro HTTP:', errorText);
+                throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
             }
             
             const data = await response.json();
+            console.log('📊 Dados recebidos:', data);
             
             if (data.error) {
-                throw new Error(data.error.message || 'Erro na API do Facebook');
+                console.error('❌ Erro da API Facebook:', data.error);
+                throw new Error(`API Error: ${data.error.message} (Code: ${data.error.code})`);
             }
             
             const campaigns = data.data || [];

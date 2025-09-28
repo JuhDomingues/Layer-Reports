@@ -84,42 +84,113 @@ window.simulateAccountSelection = function() {
 // Função para forçar carregamento direto de campanhas
 window.forceLoadCampaigns = async function(accountId = '23843476610650659') {
     console.log('💪 Forçando carregamento direto de campanhas...');
-    console.log('📍 Account ID:', accountId);
+    console.log('📍 Account ID original:', accountId);
     
     const ACCESS_TOKEN = 'EAALD3k2Q0k8BPmrnpMUoCVolCZCQX8ooJMpq4Q6828ryH3Dx3XtWMUGMbVdPRpSWWCR31opwrsKNCVSsAZBYCRmFJlSzG5nXl26vVNY3q9QaULNdDN4La3ASD1ZCcimc7uU2ClOyrsIxxYH0kBkH7bE5e5baByX2VkbeOrgM7KAZAAQqn2NENC33me3AdKfOjpZC4';
     
+    // Testar primeiro se o token é válido
+    console.log('🔍 Testando token de acesso...');
     try {
-        console.log('🔍 Fazendo requisição para campanhas...');
-        const response = await fetch(`https://graph.facebook.com/v18.0/act_${accountId}/campaigns?fields=id,name,status,objective,created_time,updated_time&access_token=${ACCESS_TOKEN}`);
+        const tokenTest = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${ACCESS_TOKEN}`);
+        console.log('🔑 Token test status:', tokenTest.status);
         
-        console.log('📊 Response status:', response.status);
-        console.log('📊 Response OK:', response.ok);
-        
-        if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
+        if (tokenTest.ok) {
+            const tokenData = await tokenTest.json();
+            console.log('✅ Token válido - usuário:', tokenData);
+        } else {
+            const tokenError = await tokenTest.json();
+            console.error('❌ Token inválido:', tokenError);
+            return;
         }
+    } catch (error) {
+        console.error('❌ Erro ao testar token:', error);
+        return;
+    }
+    
+    // Testar diferentes formatos de ID
+    const testIds = [
+        accountId,
+        `act_${accountId}`,
+        accountId.replace('act_', '')
+    ];
+    
+    for (const testId of testIds) {
+        console.log(`🧪 Testando ID: ${testId}`);
+        
+        try {
+            const url = `https://graph.facebook.com/v18.0/${testId}/campaigns?fields=id,name,status,objective,created_time,updated_time&access_token=${ACCESS_TOKEN}`;
+            console.log('🔗 URL:', url);
+            
+            const response = await fetch(url);
+            console.log(`📊 Response status para ${testId}:`, response.status);
+            
+            const data = await response.json();
+            console.log(`📊 Response data para ${testId}:`, data);
+            
+            if (response.ok && !data.error) {
+                console.log(`✅ Sucesso com ID: ${testId}`);
+                console.log('✅ Campanhas encontradas:', data.data?.length || 0);
+                if (data.data) {
+                    data.data.forEach((campaign, index) => {
+                        console.log(`  ${index + 1}. ${campaign.name} (${campaign.status})`);
+                    });
+                }
+                return; // Sucesso, parar aqui
+            } else {
+                console.warn(`⚠️ Falhou com ID ${testId}:`, data.error || 'Status não OK');
+            }
+            
+        } catch (error) {
+            console.error(`❌ Erro na requisição para ${testId}:`, error);
+        }
+    }
+    
+    console.error('❌ Todos os formatos de ID falharam');
+};
+
+// Função para buscar contas reais do Business Manager
+window.getAvailableAccounts = async function() {
+    console.log('🏢 Buscando contas do Business Manager...');
+    
+    const ACCESS_TOKEN = 'EAALD3k2Q0k8BPmrnpMUoCVolCZCQX8ooJMpq4Q6828ryH3Dx3XtWMUGMbVdPRpSWWCR31opwrsKNCVSsAZBYCRmFJlSzG5nXl26vVNY3q9QaULNdDN4La3ASD1ZCcimc7uU2ClOyrsIxxYH0kBkH7bE5e5baByX2VkbeOrgM7KAZAAQqn2NENC33me3AdKfOjpZC4';
+    const BM_ID = '177341406299126';
+    
+    try {
+        const url = `https://graph.facebook.com/v18.0/${BM_ID}/owned_ad_accounts?fields=id,name,account_status,currency,business_country_code,timezone_name&access_token=${ACCESS_TOKEN}`;
+        console.log('🔗 URL:', url);
+        
+        const response = await fetch(url);
+        console.log('📊 Response status:', response.status);
         
         const data = await response.json();
-        console.log('📊 Data recebida:', data);
+        console.log('📊 Response data:', data);
         
-        if (data.error) {
-            console.error('❌ Erro da API:', data.error);
-        } else {
-            console.log('✅ Campanhas encontradas:', data.data?.length || 0);
+        if (response.ok && !data.error) {
+            console.log('✅ Contas encontradas:', data.data?.length || 0);
             if (data.data) {
-                data.data.forEach((campaign, index) => {
-                    console.log(`  ${index + 1}. ${campaign.name} (${campaign.status})`);
+                data.data.forEach((account, index) => {
+                    console.log(`  ${index + 1}. ${account.name || account.id} (ID: ${account.id})`);
                 });
+                
+                // Testar campanhas da primeira conta
+                if (data.data.length > 0) {
+                    const firstAccount = data.data[0];
+                    console.log(`🎯 Testando campanhas da primeira conta: ${firstAccount.id}`);
+                    await forceLoadCampaigns(firstAccount.id);
+                }
             }
+        } else {
+            console.error('❌ Erro ao buscar contas:', data.error || 'Status não OK');
         }
         
     } catch (error) {
-        console.error('❌ Erro na requisição:', error);
+        console.error('❌ Erro na requisição de contas:', error);
     }
 };
 
 console.log('💡 Comandos disponíveis:');
+console.log('  - getAvailableAccounts() - Buscar contas reais do BM e testar');
+console.log('  - forceLoadCampaigns() - Testar requisição direta à API');
 console.log('  - testCampaignSync() - Testar com conta já selecionada');
 console.log('  - testWithHardcodedAccount() - Testar com conta hardcoded');
 console.log('  - simulateAccountSelection() - Simular clique no botão');
-console.log('  - forceLoadCampaigns() - Testar requisição direta à API');
