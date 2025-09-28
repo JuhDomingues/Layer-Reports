@@ -1846,6 +1846,91 @@ button.filters-header-btn:hover {
     background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
 }
 
+.ad-accounts-selector-btn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3) !important;
+}
+
+.ad-accounts-selector-btn:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+}
+
+.ad-accounts-selector-btn i {
+    font-size: 1rem !important;
+}
+
+.ad-accounts-selector-btn.disabled {
+    background: #9ca3af !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+.ad-accounts-selector-btn.disabled:hover {
+    transform: none !important;
+    background: #9ca3af !important;
+}
+
+/* Reset para botão de contas de anúncios */
+button.ad-accounts-selector-btn {
+    all: unset !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: white !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    user-select: none !important;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+}
+
+button.ad-accounts-selector-btn:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+}
+
+/* Animações para notificações */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
 /* Responsividade para botões do cabeçalho */
 @media (max-width: 768px) {
     .account-selector-header-btn {
@@ -1855,6 +1940,11 @@ button.filters-header-btn:hover {
     }
     
     .filters-header-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .ad-accounts-selector-btn {
         font-size: 0.75rem;
         padding: 0.4rem 0.8rem;
     }
@@ -1872,12 +1962,14 @@ button.filters-header-btn:hover {
 @media (max-width: 480px) {
     .account-selector-header-btn span,
     .filters-header-btn span,
+    .ad-accounts-selector-btn span,
     .facebook-connect-btn span {
         display: none;
     }
     
     .account-selector-header-btn,
     .filters-header-btn,
+    .ad-accounts-selector-btn,
     .facebook-connect-btn {
         min-width: 40px;
         justify-content: center;
