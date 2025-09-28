@@ -44,6 +44,7 @@ Layer/
 └── assets/images/         # Static image resources
 ```
 778309504913999
+faç
 ### Core Components
 
 **MetaAdsInsights Class (main.js)**

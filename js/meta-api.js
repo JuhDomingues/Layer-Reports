@@ -12,6 +12,11 @@ class MetaAdsAPI {
             this.mode = localStorage.getItem('api_mode') || 'demo'; // 'demo' or 'real'
         }
         
+        // CONFIGURAÇÃO FIXA - Business Manager e Conta específicos
+        this.FIXED_BUSINESS_MANAGER_ID = '177341406299126';
+        this.FIXED_ACCOUNT_ID = 'act_4030832237237833';
+        this.FIXED_ACCOUNT_NAME = 'Conta Principal - Layer Reports';
+        
         // Initialize error handler and connection monitor
         this.errorHandler = new APIErrorHandler();
         this.connectionMonitor = new ConnectionMonitor();
@@ -265,8 +270,13 @@ class MetaAdsAPI {
         return new Promise(resolve => {
             setTimeout(() => resolve({
                 data: [
-                    { id: 'act_demo_1', name: 'Conta Demo 1 (BRL)', account_status: 1, currency: 'BRL' },
-                    { id: 'act_demo_2', name: 'Conta Demo 2 (USD)', account_status: 1, currency: 'USD' }
+                    { 
+                        id: this.FIXED_ACCOUNT_ID, 
+                        name: this.FIXED_ACCOUNT_NAME, 
+                        account_status: 1, 
+                        currency: 'BRL',
+                        business_manager_id: this.FIXED_BUSINESS_MANAGER_ID
+                    }
                 ]
             }), 500);
         });
@@ -299,8 +309,7 @@ class MetaAdsAPI {
         if (this.mode === 'demo') {
             return new Promise(resolve => setTimeout(() => resolve({
                 data: [
-                    { id: 'demo_bm_1', name: 'Business Manager Demo 1' },
-                    { id: '177341406299126', name: 'Dr. Santiago Vecina' }
+                    { id: this.FIXED_BUSINESS_MANAGER_ID, name: 'Dr. Santiago Vecina - Layer Reports' }
                 ]
             }), 300));
         }

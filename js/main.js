@@ -32,9 +32,80 @@ class MetaAdsInsights {
     async init() {
         this.setupEventListeners();
         this.initializeAPIMode();
+        this.configureFixedAccount();
         await this.checkExistingAuth();
         await this.loadInitialData();
         this.setupCharts();
+    }
+
+    configureFixedAccount() {
+        // Configurar automaticamente BM e conta específicos
+        this.selectedBusinessManagerId = this.api.FIXED_BUSINESS_MANAGER_ID;
+        this.selectedAccountId = this.api.FIXED_ACCOUNT_ID;
+        this.api.accountId = this.selectedAccountId;
+        
+        // Salvar no localStorage
+        localStorage.setItem('selected_business_manager', JSON.stringify({
+            id: this.selectedBusinessManagerId,
+            name: 'Dr. Santiago Vecina - Layer Reports'
+        }));
+        localStorage.setItem('selected_account_id', this.selectedAccountId);
+        localStorage.setItem('selected_account_name', this.api.FIXED_ACCOUNT_NAME);
+        
+        console.log('🎯 Configuração fixa aplicada:');
+        console.log('  - Business Manager:', this.selectedBusinessManagerId);
+        console.log('  - Conta:', this.selectedAccountId);
+        
+        // Atualizar interface
+        this.updateFixedSelectors();
+    }
+
+    updateFixedSelectors() {
+        // Atualizar seletor de Business Manager
+        const bmSelector = document.getElementById('businessManagerFilter');
+        if (bmSelector) {
+            bmSelector.innerHTML = '<option value="' + this.selectedBusinessManagerId + '">Dr. Santiago Vecina - Layer Reports</option>';
+            bmSelector.value = this.selectedBusinessManagerId;
+            bmSelector.style.display = 'none'; // Esconder seletor já que é fixo
+        }
+
+        // Atualizar seletor de contas
+        const accountSelector = document.getElementById('accountFilter');
+        if (accountSelector) {
+            accountSelector.innerHTML = '<option value="' + this.selectedAccountId + '">' + this.api.FIXED_ACCOUNT_NAME + '</option>';
+            accountSelector.value = this.selectedAccountId;
+            accountSelector.style.display = 'none'; // Esconder seletor já que é fixo
+        }
+
+        // Mostrar informação fixa na interface
+        this.showFixedAccountInfo();
+    }
+
+    showFixedAccountInfo() {
+        // Criar elemento de informação sobre conta fixa
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+            let fixedInfo = document.getElementById('fixed-account-info');
+            if (!fixedInfo) {
+                fixedInfo = document.createElement('div');
+                fixedInfo.id = 'fixed-account-info';
+                fixedInfo.style.cssText = `
+                    background: #e3f2fd;
+                    color: #1565c0;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    margin-right: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    border: 1px solid #bbdefb;
+                `;
+                fixedInfo.innerHTML = '<i class="fas fa-lock" style="font-size: 10px;"></i>Layer Reports - Conta Principal';
+                headerRight.insertBefore(fixedInfo, headerRight.firstChild);
+            }
+        }
     }
 
     async checkExistingAuth() {
@@ -312,66 +383,79 @@ class MetaAdsInsights {
     }
 
     generateMockData() {
+        // Campanhas específicas da Layer Reports (Dr. Santiago Vecina)
         const campaigns = [
             {
-                name: 'Black Friday Sale 2024',
+                name: 'Layer Reports - Dashboard Premium',
                 status: 'active',
-                impressions: 125420,
-                clicks: 3876,
-                ctr: 3.09,
-                cpc: 0.85,
-                conversions: 156,
-                spend: 3294.60
+                impressions: 156780,
+                clicks: 4823,
+                ctr: 3.08,
+                cpc: 0.92,
+                conversions: 234,
+                spend: 4437.16,
+                account_id: this.api.FIXED_ACCOUNT_ID,
+                business_manager_id: this.api.FIXED_BUSINESS_MANAGER_ID
             },
             {
-                name: 'Holiday Collection',
+                name: 'Layer - Relatórios Meta Ads',
                 status: 'active',
-                impressions: 98765,
-                clicks: 2547,
-                ctr: 2.58,
-                cpc: 1.12,
-                conversions: 89,
-                spend: 2852.64
+                impressions: 98432,
+                clicks: 2876,
+                ctr: 2.92,
+                cpc: 1.18,
+                conversions: 127,
+                spend: 3393.68,
+                account_id: this.api.FIXED_ACCOUNT_ID,
+                business_manager_id: this.api.FIXED_BUSINESS_MANAGER_ID
             },
             {
-                name: 'Summer Campaign',
-                status: 'paused',
-                impressions: 67890,
-                clicks: 1234,
-                ctr: 1.82,
+                name: 'Dashboard Analytics - Retargeting',
+                status: 'active',
+                impressions: 67234,
+                clicks: 3124,
+                ctr: 4.65,
                 cpc: 1.45,
-                conversions: 45,
-                spend: 1789.30
+                conversions: 189,
+                spend: 4529.80,
+                account_id: this.api.FIXED_ACCOUNT_ID,
+                business_manager_id: this.api.FIXED_BUSINESS_MANAGER_ID
             },
             {
-                name: 'Brand Awareness',
+                name: 'Layer Reports - Brand Awareness',
                 status: 'active',
-                impressions: 234567,
-                clicks: 4321,
-                ctr: 1.84,
-                cpc: 0.67,
-                conversions: 198,
-                spend: 2895.07
+                impressions: 245678,
+                clicks: 4567,
+                ctr: 1.86,
+                cpc: 0.78,
+                conversions: 156,
+                spend: 3562.26,
+                account_id: this.api.FIXED_ACCOUNT_ID,
+                business_manager_id: this.api.FIXED_BUSINESS_MANAGER_ID
             },
             {
-                name: 'Retargeting Campaign',
+                name: 'Meta Ads Insights - Lookalike',
+                status: 'paused',
+                impressions: 43567,
+                clicks: 1876,
+                ctr: 4.31,
+                cpc: 1.67,
+                conversions: 98,
+                spend: 3132.92,
+                account_id: this.api.FIXED_ACCOUNT_ID,
+                business_manager_id: this.api.FIXED_BUSINESS_MANAGER_ID
+            },
+            {
+                name: 'Layer - Teste A/B Dashboard',
                 status: 'active',
-                impressions: 45678,
-                clicks: 2109,
-                ctr: 4.62,
-                cpc: 1.89,
-                conversions: 278,
-                spend: 3986.01
-            },
-            {
-                name: 'Product Launch',
-                status: 'inactive',
-                impressions: 12345,
-                clicks: 567,
-                ctr: 4.59,
-                cpc: 2.15,
-                conversions: 67,
-                spend: 1218.05
+                impressions: 78945,
+                clicks: 2345,
+                ctr: 2.97,
+                cpc: 1.23,
+                conversions: 89,
+                spend: 2884.35,
+                account_id: this.api.FIXED_ACCOUNT_ID,
+                business_manager_id: this.api.FIXED_BUSINESS_MANAGER_ID
             }
         ];
 
