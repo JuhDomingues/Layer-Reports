@@ -19,13 +19,12 @@
             return;
         }
         
-        // Atualizar texto baseado na conta selecionada
-        updateAccountButtonText(btn);
+        // Atualizar texto - mostrar sempre como conectado ao BM fixo
+        btn.innerHTML = '<i class="fas fa-building"></i><span>Dr. Santiago Vecina - Layer...</span>';
         
-        // Ação do clique
+        // Ação do clique - agora apenas mostra status
         btn.addEventListener('click', function() {
-            console.log('🏢 Conectando ao Business Manager via API...');
-            connectToBusinessManager();
+            showInfoMessage('Business Manager configurado: Dr. Santiago Vecina (177341406299126)');
         });
         
         console.log('✅ Botão de seleção de contas configurado');
@@ -39,20 +38,13 @@
             return;
         }
         
-        // Atualizar estado inicial
+        // Atualizar estado inicial - sempre disponível agora
         updateAdAccountsButtonState(btn);
         
-        // Ação do clique
+        // Ação do clique - buscar diretamente do BM fixo
         btn.addEventListener('click', function() {
-            const hasConnectedBM = localStorage.getItem('connected_bm_id');
-            
-            if (!hasConnectedBM) {
-                showErrorMessage('Primeiro conecte ao Business Manager clicando no botão verde');
-                return;
-            }
-            
-            console.log('💳 Abrindo seletor de contas de anúncios...');
-            showAdAccountsSelector();
+            console.log('💳 Buscando contas do Business Manager 177341406299126...');
+            showAdAccountsSelectorWithToken();
         });
         
         console.log('✅ Botão de seleção de contas de anúncios configurado');
@@ -126,14 +118,9 @@
     
     // Atualizar estado do botão de contas de anúncios
     function updateAdAccountsButtonState(btn) {
-        const hasConnectedBM = localStorage.getItem('connected_bm_id');
         const selectedAdAccount = localStorage.getItem('selected_ad_account');
         
-        if (!hasConnectedBM) {
-            btn.classList.add('disabled');
-            btn.innerHTML = '<i class="fas fa-credit-card"></i><span>Conecte ao BM</span>';
-            btn.style.cursor = 'not-allowed';
-        } else if (selectedAdAccount) {
+        if (selectedAdAccount) {
             try {
                 const accountData = JSON.parse(selectedAdAccount);
                 let displayName = accountData.name || accountData.account_id || 'Conta Selecionada';
@@ -152,6 +139,7 @@
                 btn.style.cursor = 'pointer';
             }
         } else {
+            // Sempre disponível - não depende mais do BM conectado
             btn.classList.remove('disabled');
             btn.innerHTML = '<i class="fas fa-credit-card"></i><span>Selecionar Conta</span>';
             btn.style.cursor = 'pointer';
@@ -688,6 +676,62 @@
         document.body.appendChild(modal);
     }
     
+    // Mostrar seletor de contas com token fixo
+    async function showAdAccountsSelectorWithToken() {
+        const FIXED_BM_ID = '177341406299126';
+        const ACCESS_TOKEN = 'SEU_TOKEN_AQUI'; // TODO: Adicionar token real
+        
+        try {
+            showLoadingModal('Buscando contas de anúncios do Business Manager...');
+            
+            // Buscar contas diretamente via fetch com token fixo
+            const response = await fetch(`https://graph.facebook.com/v18.0/${FIXED_BM_ID}/owned_ad_accounts?fields=id,name,account_status,currency,business_country_code,timezone_name&access_token=${ACCESS_TOKEN}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            hideLoadingModal();
+            
+            if (data.error) {
+                throw new Error(data.error.message || 'Erro na API do Facebook');
+            }
+            
+            const adAccounts = data.data || [];
+            
+            if (adAccounts.length === 0) {
+                showErrorMessage('Nenhuma conta de anúncios encontrada no Business Manager');
+                return;
+            }
+            
+            // Salvar contas encontradas
+            localStorage.setItem('available_ad_accounts', JSON.stringify(adAccounts));
+            localStorage.setItem('connected_bm_id', FIXED_BM_ID);
+            localStorage.setItem('connected_bm_name', 'Dr. Santiago Vecina - Layer Reports');
+            
+            // Criar modal de seleção
+            createAdAccountsModal(adAccounts);
+            
+        } catch (error) {
+            hideLoadingModal();
+            console.error('Erro ao buscar contas:', error);
+            
+            // Fallback: tentar usar contas salvas
+            const storedAccounts = localStorage.getItem('available_ad_accounts');
+            if (storedAccounts) {
+                try {
+                    const accounts = JSON.parse(storedAccounts);
+                    showErrorMessage(`Erro na API: ${error.message}. Usando dados em cache.`);
+                    createAdAccountsModal(accounts);
+                    return;
+                } catch (e) {}
+            }
+            
+            showErrorMessage(`Erro ao buscar contas: ${error.message}`);
+        }
+    }
+    
     // Funções auxiliares para modais
     function showLoadingModal(message) {
         hideLoadingModal(); // Remover modal existente
@@ -810,6 +854,43 @@
             modal.style.animation = 'slideOutRight 0.3s ease-out';
             setTimeout(() => modal.remove(), 300);
         }, 5000);
+    }
+    
+    function showInfoMessage(message) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 10002;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+        `;
+        
+        modal.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-info-circle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Fechar ao clicar
+        modal.addEventListener('click', () => {
+            modal.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => modal.remove(), 300);
+        });
+        
+        setTimeout(() => {
+            modal.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => modal.remove(), 300);
+        }, 4000);
     }
     
     // Monitorar mudanças nos dados
