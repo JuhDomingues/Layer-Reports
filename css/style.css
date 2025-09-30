@@ -3465,6 +3465,40 @@ button.ad-accounts-selector-btn:hover {
     padding: 1rem;
     border-radius: 8px;
     border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.filters-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.campaign-filter, .date-range-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.campaign-filter i, .date-range-picker i {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.campaign-filter select, .date-range-picker select {
+    border: none;
+    background: transparent;
+    color: #374151;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    min-width: 150px;
 }
 
 .filter-section h4 {

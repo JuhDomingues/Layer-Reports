@@ -101,6 +101,47 @@
 
             <!-- Content Area -->
             <div class="content-area">
+                <!-- Campaign Filter Section -->
+                <section class="filter-section">
+                    <div class="filters-container">
+                        <div class="campaign-filter">
+                            <i class="fas fa-filter"></i>
+                            <select id="campaignFilter">
+                                <option value="all">Todas as campanhas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="date-range-picker">
+                            <i class="fas fa-calendar"></i>
+                            <select id="dateRange">
+                                <option value="today">Hoje</option>
+                                <option value="yesterday">Ontem</option>
+                                <option value="7">Últimos 7 dias</option>
+                                <option value="14">Últimos 14 dias</option>
+                                <option value="30" selected>Últimos 30 dias</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="custom-date-picker" id="customDatePicker" style="display: none;">
+                        <div class="date-inputs">
+                            <div class="date-input-group">
+                                <label for="startDate">De:</label>
+                                <input type="date" id="startDate" class="date-input">
+                            </div>
+                            <div class="date-input-group">
+                                <label for="endDate">Até:</label>
+                                <input type="date" id="endDate" class="date-input">
+                            </div>
+                            <button class="apply-date-btn" id="applyCustomDate">
+                                <i class="fas fa-check"></i>
+                                Aplicar
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- KPI Cards -->
                 <section class="kpi-section">
                     <div class="kpi-grid">
@@ -224,14 +265,6 @@
                         <div class="table-header">
                             <h3>Campanhas Detalhadas</h3>
                             <div class="table-controls">
-                                <!-- Novo filtro de campanhas -->
-                                <div class="campaign-filter">
-                                    <i class="fas fa-filter"></i>
-                                    <select id="campaignFilter">
-                                        <option value="all">Todas as campanhas</option>
-                                    </select>
-                                </div>
-                                
                                 <div class="search-box">
                                     <i class="fas fa-search"></i>
                                     <input type="text" placeholder="Buscar campanhas..." id="searchCampaigns">

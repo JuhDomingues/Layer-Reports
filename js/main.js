@@ -547,9 +547,9 @@ class MetaAdsInsights {
     updateKPIs() {
         const totals = this.data.totals;
         
-        // Calcular métricas adicionais
-        const roi = ((totals.conversions * 50 - totals.spend) / totals.spend * 100);
-        const conversionRate = (totals.conversions / totals.clicks * 100);
+        // Calcular métricas adicionais com validação
+        const roi = totals.spend > 0 ? ((totals.conversions * 50 - totals.spend) / totals.spend * 100) : 0;
+        const conversionRate = totals.clicks > 0 ? (totals.conversions / totals.clicks * 100) : 0;
         const filteredCampaigns = this.data.campaigns.filter(c => c.status === 'active').length;
         
         // Formatar números
@@ -2362,14 +2362,36 @@ class MetaAdsInsights {
                                 totalClicks += parseInt(insight.clicks) || 0;
                                 totalSpend += parseFloat(insight.spend) || 0;
                                 
-                                // Calculate conversions from actions
+                                // Calculate conversions from actions - enhanced mapping
                                 if (insight.actions) {
                                     insight.actions.forEach(action => {
+                                        // Map various Facebook conversion action types
                                         if (action.action_type.includes('conversion') || 
-                                            action.action_type.includes('purchase')) {
+                                            action.action_type.includes('purchase') ||
+                                            action.action_type.includes('lead') ||
+                                            action.action_type.includes('complete_registration') ||
+                                            action.action_type.includes('submit_application') ||
+                                            action.action_type.includes('add_to_cart') ||
+                                            action.action_type.includes('initiate_checkout') ||
+                                            action.action_type === 'offsite_conversion.fb_pixel_purchase' ||
+                                            action.action_type === 'offsite_conversion.fb_pixel_lead' ||
+                                            action.action_type === 'offsite_conversion.custom') {
                                             totalConversions += parseInt(action.value) || 0;
                                         }
                                     });
+                                }
+                                
+                                // Also check for direct conversion fields
+                                if (insight.conversions) {
+                                    totalConversions += parseInt(insight.conversions) || 0;
+                                }
+                                
+                                // Check for purchase_value and other conversion-related fields
+                                if (insight.purchase_value) {
+                                    // If there's purchase value but no conversions counted, estimate conversions
+                                    if (totalConversions === 0 && parseFloat(insight.purchase_value) > 0) {
+                                        totalConversions += 1; // At least one conversion if there's purchase value
+                                    }
                                 }
                             });
                             
@@ -3079,8 +3101,6 @@ function fullDiagnostic() {
         console.log('❌ App não inicializado');
         return;
     }
-    
-    const app = window.metaAdsApp;
     
     console.log('📋 1. VERIFICANDO ELEMENTOS DOM:');
     const elements = {
