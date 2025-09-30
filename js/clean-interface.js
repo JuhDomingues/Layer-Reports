@@ -58,44 +58,6 @@
         });
     }
     
-    // Função para mostrar status premium
-    function showPremiumStatus() {
-        // Criar indicador de status premium
-        const existingStatus = document.getElementById('premium-status');
-        if (existingStatus) {
-            existingStatus.remove();
-        }
-        
-        const premiumStatus = document.createElement('div');
-        premiumStatus.id = 'premium-status';
-        premiumStatus.style.cssText = `
-            position: fixed !important;
-            top: 20px !important;
-            right: 20px !important;
-            background: linear-gradient(135deg, #10b981, #059669) !important;
-            color: white !important;
-            padding: 8px 16px !important;
-            border-radius: 20px !important;
-            font-size: 12px !important;
-            font-weight: bold !important;
-            z-index: 999999 !important;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-        `;
-        
-        premiumStatus.innerHTML = '🚀 Modo Premium Ativo';
-        
-        // Verificar se tem token válido
-        const hasToken = localStorage.getItem('facebook_access_token');
-        const apiMode = localStorage.getItem('api_mode');
-        
-        if (hasToken && apiMode === 'real') {
-            document.body.appendChild(premiumStatus);
-            console.log('✅ Status premium exibido');
-        }
-    }
     
     // Função para simplificar header
     function simplifyHeader() {
@@ -132,7 +94,6 @@
     // Executar limpeza quando DOM estiver pronto
     function executeCleanup() {
         hideLoginElements();
-        showPremiumStatus();
         simplifyHeader();
         removeInstructionModals();
         
