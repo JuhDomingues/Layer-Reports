@@ -446,6 +446,14 @@ class MetaAdsAPI {
         return new Promise(resolve => setTimeout(() => resolve({ data: layerCampaigns }), 300));
     }
 
+    // Método principal para buscar campanhas (híbrido)
+    async getCampaigns(accountId, dateFilters = null) {
+        if (this.mode === 'demo') {
+            return this.getDemoCampaigns();
+        }
+        return this.getRealCampaigns(accountId, { dateFilters });
+    }
+
     async getRealCampaigns(accountId, filters) {
         console.log(`[DEBUG] getRealCampaigns: Start for account ${accountId}`, filters);
         if (!this.accessToken) throw new Error('Access token não encontrado.');
@@ -485,17 +493,11 @@ class MetaAdsAPI {
     }
 
     // Buscar insights/métricas (híbrido)
-    async getInsights(objectId, dateRange = '30') {
-        // Se configuração fixa estiver ativa, SEMPRE usar dados demo
-        if (localStorage.getItem('is_fixed_configuration') === 'true') {
-            console.log('🎯 Configuração fixa detectada - retornando insights demo da Layer Reports');
-            return this.getDemoInsights(objectId);
-        }
-        
+    async getInsights(objectId, dateFilters = null) {
         if (this.mode === 'demo') {
             return this.getDemoInsights(objectId);
         }
-        return this.getRealInsights(objectId, dateRange);
+        return this.getRealInsights(objectId, dateFilters);
     }
 
     getDemoInsights(objectId) {
@@ -507,18 +509,30 @@ class MetaAdsAPI {
         }]}), 400));
     }
 
-    async getRealInsights(objectId, dateRange) {
-        console.log(`[DEBUG] getRealInsights: Start for object ${objectId}`);
+    async getRealInsights(objectId, dateFilters) {
+        console.log(`[DEBUG] getRealInsights: Start for object ${objectId}`, dateFilters);
         if (!this.accessToken) throw new Error('Access token não encontrado.');
 
-        const datePreset = `last_${dateRange}d`;
+        const params = {
+            fields: 'impressions,clicks,spend,ctr,cpc,cpm,actions',
+            access_token: this.accessToken
+        };
+
+        // Usar filtros de data específicos se fornecidos
+        if (dateFilters && dateFilters.since && dateFilters.until) {
+            params.time_range = JSON.stringify({
+                since: dateFilters.since,
+                until: dateFilters.until
+            });
+        } else {
+            // Fallback para preset padrão
+            params.date_preset = 'last_30d';
+        }
+
+        console.log(`[DEBUG] getRealInsights: API params:`, params);
 
         return new Promise((resolve, reject) => {
-            FB.api(`/${objectId}/insights`, {
-                fields: 'impressions,clicks,spend,ctr,cpc,cpm,actions',
-                date_preset: datePreset,
-                access_token: this.accessToken
-            }, (response) => {
+            FB.api(`/${objectId}/insights`, params, (response) => {
                 console.log(`[DEBUG] getRealInsights: /${objectId}/insights response:`, response);
                 if (response.error) {
                     console.error('[DEBUG] getRealInsights: API Error', response.error);

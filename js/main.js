@@ -788,6 +788,39 @@ class MetaAdsInsights {
         this.applyFilters();
     }
 
+    getDateFiltersForAPI() {
+        let since, until;
+        
+        if (this.customStartDate && this.customEndDate) {
+            // Usar datas personalizadas
+            since = this.customStartDate.toISOString().split('T')[0];
+            until = this.customEndDate.toISOString().split('T')[0];
+        } else {
+            // Calcular datas baseadas no range
+            const endDate = new Date();
+            const startDate = new Date();
+            
+            if (this.currentDateRange === 1) {
+                // Hoje
+                since = endDate.toISOString().split('T')[0];
+                until = endDate.toISOString().split('T')[0];
+            } else if (this.currentDateRange === 2) {
+                // Ontem
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                since = yesterday.toISOString().split('T')[0];
+                until = yesterday.toISOString().split('T')[0];
+            } else {
+                // Últimos N dias
+                startDate.setDate(startDate.getDate() - (this.currentDateRange - 1));
+                since = startDate.toISOString().split('T')[0];
+                until = endDate.toISOString().split('T')[0];
+            }
+        }
+        
+        return { since, until };
+    }
+
     handleDateRangeChange(event) {
         const value = event.target.value;
         const customDatePicker = document.getElementById('customDatePicker');
@@ -2190,6 +2223,8 @@ class MetaAdsInsights {
 
     async loadRealData() {
         console.log('🔍 loadRealData started with selectedAccountId:', this.selectedAccountId);
+        console.log('🔍 Current date range:', this.currentDateRange);
+        console.log('🔍 Custom dates:', this.customStartDate, this.customEndDate);
         
         // Verificar modo API
         if (this.api.mode === 'demo') {
@@ -2221,7 +2256,11 @@ class MetaAdsInsights {
                 console.log('🔍 API mode:', this.api.mode);
                 console.log('🔍 Access token present:', !!this.api.accessToken);
                 
-                campaigns = await this.api.getCampaigns(this.selectedAccountId);
+                // Preparar filtros de data para API
+                const dateFilters = this.getDateFiltersForAPI();
+                console.log('🔍 Date filters for API:', dateFilters);
+                
+                campaigns = await this.api.getCampaigns(this.selectedAccountId, dateFilters);
                 console.log('🔍 getCampaigns result:', campaigns);
                 console.log('🔍 getCampaigns type:', typeof campaigns);
                 console.log('🔍 getCampaigns has data:', campaigns && campaigns.hasOwnProperty('data'));
@@ -2385,8 +2424,9 @@ class MetaAdsInsights {
                     try {
                         console.log('🔍 Fetching insights for campaign:', campaign.id);
                         
-                        // Add timeout to prevent hanging
-                        const insightsPromise = this.api.getInsights(campaign.id, '30');
+                        // Add timeout to prevent hanging - use date filters from current selection
+                        const dateFilters = this.getDateFiltersForAPI();
+                        const insightsPromise = this.api.getInsights(campaign.id, dateFilters);
                         const timeoutPromise = new Promise((_, reject) => 
                             setTimeout(() => reject(new Error('Timeout getting insights')), 10000)
                         );
