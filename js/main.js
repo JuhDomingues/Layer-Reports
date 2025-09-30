@@ -953,14 +953,28 @@ class MetaAdsInsights {
     async refreshData() {
         this.showLoading();
         
-        // Simular nova requisição à API
-        await this.sleep(1500);
-        
-        this.data = this.generateMockData();
-        this.allCampaigns = [...this.data.campaigns];
-        
-        // Apply current filters
-        this.applyFilters();
+        try {
+            // Verificar se deve carregar dados reais ou mock
+            if (this.api.mode === 'real' && this.api.isAuthenticated() && this.selectedAccountId) {
+                console.log('🔄 Recarregando dados reais da API...');
+                await this.loadRealData();
+            } else {
+                console.log('🔄 Recarregando dados demo...');
+                await this.sleep(1500);
+                this.data = this.generateMockData();
+                this.allCampaigns = [...this.data.campaigns];
+                
+                // Apply current filters
+                this.applyFilters();
+            }
+        } catch (error) {
+            console.error('Erro ao recarregar dados:', error);
+            // Fallback para dados mock em caso de erro
+            this.data = this.generateMockData();
+            this.allCampaigns = [...this.data.campaigns];
+            this.applyFilters();
+            this.showError('Erro ao carregar dados. Usando dados demo.');
+        }
         
         this.hideLoading();
     }
@@ -2177,10 +2191,10 @@ class MetaAdsInsights {
     async loadRealData() {
         console.log('🔍 loadRealData started with selectedAccountId:', this.selectedAccountId);
         
-        // Se estiver em configuração fixa, usar sempre dados demo
-        if (this.isFixedConfiguration || localStorage.getItem('is_fixed_configuration') === 'true') {
-            console.log('🎯 Configuração fixa detectada - usando dados demo');
-            this.showLoading('Carregando dados da Layer Reports...');
+        // Verificar modo API
+        if (this.api.mode === 'demo') {
+            console.log('🎯 Modo demo - usando dados demo');
+            this.showLoading('Carregando dados demo...');
             await this.sleep(1500);
             this.data = this.generateMockData();
             this.allCampaigns = [...this.data.campaigns];
