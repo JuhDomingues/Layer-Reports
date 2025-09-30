@@ -768,6 +768,7 @@ class MetaAdsInsights {
         const customDatePicker = document.getElementById('customDatePicker');
         
         if (value === 'custom') {
+            customDatePicker.classList.add('show');
             customDatePicker.style.display = 'block';
             // Set default dates (last 30 days)
             const endDate = new Date();
@@ -777,8 +778,29 @@ class MetaAdsInsights {
             document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
             document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
         } else {
+            customDatePicker.classList.remove('show');
             customDatePicker.style.display = 'none';
-            this.currentDateRange = parseInt(value);
+            
+            // Update current date range based on selection
+            switch(value) {
+                case 'today':
+                    this.currentDateRange = 1;
+                    break;
+                case 'yesterday':
+                    this.currentDateRange = 2;
+                    break;
+                case '7':
+                    this.currentDateRange = 7;
+                    break;
+                case '14':
+                    this.currentDateRange = 14;
+                    break;
+                case '30':
+                    this.currentDateRange = 30;
+                    break;
+                default:
+                    this.currentDateRange = 30;
+            }
             this.refreshData();
         }
     }
@@ -821,51 +843,6 @@ class MetaAdsInsights {
         return { since, until };
     }
 
-    handleDateRangeChange(event) {
-        const value = event.target.value;
-        const customDatePicker = document.getElementById('customDatePicker');
-        
-        if (value === 'custom') {
-            customDatePicker.style.display = 'block';
-            // Set default dates (last 30 days)
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - 30);
-            
-            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
-            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
-        } else {
-            customDatePicker.style.display = 'none';
-            
-            // Update current date range based on selection
-            switch(value) {
-                case 'today':
-                    this.currentDateRange = 1;
-                    break;
-                case 'yesterday':
-                    this.currentDateRange = 2;
-                    break;
-                case '7':
-                    this.currentDateRange = 7;
-                    break;
-                case '14':
-                    this.currentDateRange = 14;
-                    break;
-                case '30':
-                    this.currentDateRange = 30;
-                    break;
-                default:
-                    this.currentDateRange = 30;
-            }
-            
-            // Clear custom date range
-            this.customStartDate = null;
-            this.customEndDate = null;
-            
-            // Refresh data with new range
-            this.refreshData();
-        }
-    }
 
     applyFilters() {
         let filteredCampaigns = [...this.allCampaigns];
@@ -977,7 +954,9 @@ class MetaAdsInsights {
         this.customEndDate = end;
         
         // Hide custom picker
-        document.getElementById('customDatePicker').style.display = 'none';
+        const customDatePicker = document.getElementById('customDatePicker');
+        customDatePicker.classList.remove('show');
+        customDatePicker.style.display = 'none';
         
         // Update data with custom range
         this.refreshData();
