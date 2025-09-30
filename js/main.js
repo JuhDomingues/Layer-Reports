@@ -506,7 +506,7 @@ class MetaAdsInsights {
         };
     }
 
-    generateTimeSeriesData() {
+    generateTimeSeriesData(filteredCampaigns = null) {
         const days = [];
         const data = {
             impressions: [],
@@ -515,20 +515,41 @@ class MetaAdsInsights {
             spend: []
         };
 
+        // Use filtered campaigns data if provided, otherwise use current data
+        const campaignsToUse = filteredCampaigns || this.data?.campaigns || [];
+        
+        // Calculate daily distribution from filtered campaigns
+        const totalMetrics = campaignsToUse.reduce((acc, campaign) => {
+            acc.impressions += campaign.impressions || 0;
+            acc.clicks += campaign.clicks || 0;
+            acc.conversions += campaign.conversions || 0;
+            acc.spend += campaign.spend || 0;
+            return acc;
+        }, { impressions: 0, clicks: 0, conversions: 0, spend: 0 });
+
         for (let i = this.currentDateRange - 1; i >= 0; i--) {
             const date = new Date();
-            date.setDate(date.getDate() - i);
+            
+            // Handle custom date range
+            if (this.customStartDate && this.customEndDate) {
+                const totalDays = Math.ceil((this.customEndDate - this.customStartDate) / (1000 * 60 * 60 * 24));
+                const dayIndex = Math.floor((i / (this.currentDateRange - 1)) * totalDays);
+                date = new Date(this.customStartDate);
+                date.setDate(date.getDate() + dayIndex);
+            } else {
+                date.setDate(date.getDate() - i);
+            }
+            
             days.push(date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }));
 
-            // Gerar dados aleatórios com tendência
-            const baseImpression = 15000 + Math.random() * 10000;
-            const baseCTR = 0.02 + Math.random() * 0.03;
-            const baseConversionRate = 0.03 + Math.random() * 0.02;
+            // Distribute metrics across days with realistic variation
+            const dailyVariation = 0.7 + Math.random() * 0.6; // 70%-130% variation
+            const dailyFactor = dailyVariation / this.currentDateRange;
 
-            data.impressions.push(Math.floor(baseImpression));
-            data.clicks.push(Math.floor(baseImpression * baseCTR));
-            data.conversions.push(Math.floor(baseImpression * baseCTR * baseConversionRate));
-            data.spend.push(Math.floor(baseImpression * baseCTR * (0.8 + Math.random() * 0.6)));
+            data.impressions.push(Math.floor(totalMetrics.impressions * dailyFactor));
+            data.clicks.push(Math.floor(totalMetrics.clicks * dailyFactor));
+            data.conversions.push(Math.floor(totalMetrics.conversions * dailyFactor));
+            data.spend.push(Math.floor(totalMetrics.spend * dailyFactor));
         }
 
         return { days, data };
@@ -830,6 +851,9 @@ class MetaAdsInsights {
         // Update data with filtered campaigns
         this.data.campaigns = filteredCampaigns;
         this.data.totals = this.calculateTotals(filteredCampaigns);
+        
+        // Update time series data based on filtered campaigns
+        this.data.timeSeries = this.generateTimeSeriesData(filteredCampaigns);
         
         // Update UI
         this.updateKPIs();
