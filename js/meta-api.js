@@ -17,12 +17,8 @@ class MetaAdsAPI {
         this.FIXED_ACCOUNT_ID = 'act_4030832237237833';
         this.FIXED_ACCOUNT_NAME = 'Conta Principal - Layer Reports';
         
-        // Se configuração fixa estiver ativa, forçar modo demo SEMPRE
-        if (localStorage.getItem('is_fixed_configuration') === 'true') {
-            this.mode = 'demo';
-            localStorage.setItem('api_mode', 'demo');
-            console.log('🎯 Configuração fixa detectada - modo demo forçado');
-        }
+        // Remover configuração fixa para permitir API real
+        localStorage.removeItem('is_fixed_configuration');
         
         // Initialize error handler and connection monitor
         this.errorHandler = new APIErrorHandler();
@@ -48,14 +44,6 @@ class MetaAdsAPI {
 
     // Alternar modo API
     setMode(mode) {
-        // Se configuração fixa estiver ativa, forçar modo demo
-        if (localStorage.getItem('is_fixed_configuration') === 'true') {
-            console.log('🎯 Configuração fixa ativa - forçando modo demo');
-            this.mode = 'demo';
-            localStorage.setItem('api_mode', 'demo');
-            return true;
-        }
-        
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         if (mode === 'real' && !this.isHttps && !isLocalhost) {
             console.warn('⚠️ Modo real requer HTTPS. Mantendo modo demo.');

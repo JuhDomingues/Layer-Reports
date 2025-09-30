@@ -25,49 +25,13 @@ class MetaAdsInsights {
             name: '',
             exactMatch: false
         };
-        this.isFixedConfiguration = localStorage.getItem('is_fixed_configuration') === 'true';
-        
-        // Se configuração fixa estiver ativa, sobrescrever métodos críticos
-        if (this.isFixedConfiguration) {
-            this.overrideForFixedMode();
-        }
+        // Remover configuração fixa para permitir dados reais
+        this.isFixedConfiguration = false;
+        localStorage.removeItem('is_fixed_configuration');
         
         this.init();
     }
 
-    overrideForFixedMode() {
-        console.log('🎯 Ativando modo de override para configuração fixa');
-        
-        // Sobrescrever completamente loadRealData
-        const originalLoadRealData = this.loadRealData.bind(this);
-        this.loadRealData = async () => {
-            console.log('🎯 loadRealData interceptado - usando dados demo da Layer Reports');
-            this.showLoading('Carregando dados da Layer Reports...');
-            await this.sleep(1500);
-            this.data = this.generateMockData();
-            this.allCampaigns = [...this.data.campaigns];
-            this.populateCampaignFilter();
-            this.updateKPIs();
-            this.updateCampaignsTable();
-            this.updateCharts();
-            this.hideLoading();
-            this.showSuccess('Dados da Layer Reports carregados!');
-        };
-        
-        // Sobrescrever método de carregamento inicial para garantir
-        const originalLoadInitialData = this.loadInitialData.bind(this);
-        this.loadInitialData = async () => {
-            console.log('🎯 loadInitialData interceptado - usando dados demo da Layer Reports');
-            this.showLoading('Carregando dados da Layer Reports...');
-            await this.sleep(1500);
-            this.data = this.generateMockData();
-            this.allCampaigns = [...this.data.campaigns];
-            this.populateCampaignFilter();
-            this.updateKPIs();
-            this.updateCampaignsTable();
-            this.hideLoading();
-        };
-    }
 
     async init() {
         this.setupEventListeners();
@@ -83,8 +47,6 @@ class MetaAdsInsights {
         this.selectedBusinessManagerId = this.api.FIXED_BUSINESS_MANAGER_ID;
         this.selectedAccountId = this.api.FIXED_ACCOUNT_ID;
         this.api.accountId = this.selectedAccountId;
-        this.isFixedConfiguration = true; // Flag para indicar configuração fixa
-        
         // Salvar no localStorage
         localStorage.setItem('selected_business_manager', JSON.stringify({
             id: this.selectedBusinessManagerId,
@@ -92,12 +54,11 @@ class MetaAdsInsights {
         }));
         localStorage.setItem('selected_account_id', this.selectedAccountId);
         localStorage.setItem('selected_account_name', this.api.FIXED_ACCOUNT_NAME);
-        localStorage.setItem('is_fixed_configuration', 'true');
         
-        console.log('🎯 Configuração fixa aplicada:');
+        console.log('🎯 Configuração de conta aplicada:');
         console.log('  - Business Manager:', this.selectedBusinessManagerId);
         console.log('  - Conta:', this.selectedAccountId);
-        console.log('  - Modo fixo ativo: sempre usar dados demo');
+        console.log('  - Pronto para carregar dados reais da API');
         
         // Atualizar interface
         this.updateFixedSelectors();
