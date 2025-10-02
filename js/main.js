@@ -812,34 +812,44 @@ class MetaAdsInsights {
 
     getDateFiltersForAPI() {
         let since, until;
-        
+
+        console.log('📅 getDateFiltersForAPI called');
+        console.log('📅 customStartDate:', this.customStartDate);
+        console.log('📅 customEndDate:', this.customEndDate);
+        console.log('📅 currentDateRange:', this.currentDateRange);
+
         if (this.customStartDate && this.customEndDate) {
             // Usar datas personalizadas
             since = this.customStartDate.toISOString().split('T')[0];
             until = this.customEndDate.toISOString().split('T')[0];
+            console.log('📅 Using custom dates:', { since, until });
         } else {
             // Calcular datas baseadas no range
             const endDate = new Date();
             const startDate = new Date();
-            
+
             if (this.currentDateRange === 1) {
                 // Hoje
                 since = endDate.toISOString().split('T')[0];
                 until = endDate.toISOString().split('T')[0];
+                console.log('📅 Using TODAY:', { since, until });
             } else if (this.currentDateRange === 2) {
                 // Ontem
                 const yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
                 since = yesterday.toISOString().split('T')[0];
                 until = yesterday.toISOString().split('T')[0];
+                console.log('📅 Using YESTERDAY:', { since, until });
             } else {
                 // Últimos N dias
                 startDate.setDate(startDate.getDate() - (this.currentDateRange - 1));
                 since = startDate.toISOString().split('T')[0];
                 until = endDate.toISOString().split('T')[0];
+                console.log(`📅 Using LAST ${this.currentDateRange} DAYS:`, { since, until });
             }
         }
-        
+
+        console.log('📅 Final date filters:', { since, until });
         return { since, until };
     }
 
@@ -2407,19 +2417,26 @@ class MetaAdsInsights {
                         );
 
                         const insightsData = await Promise.race([insightsPromise, timeoutPromise]);
-                        console.log('🔍 Insights data received for', campaign.name, ':', insightsData);
+
+                        console.log('========================================');
+                        console.log(`📊 INSIGHTS DATA for ${campaign.name}:`);
+                        console.log('Raw insightsData:', JSON.stringify(insightsData, null, 2));
+                        console.log('Number of results:', insightsData.data?.length);
+                        console.log('========================================');
 
                         if (insightsData.data && insightsData.data.length > 0) {
                             // A API do Meta Ads agora retorna dados JÁ AGREGADOS (sem time_increment)
                             // Então devemos usar o PRIMEIRO (e único) resultado, NÃO somar
                             const insight = insightsData.data[0]; // Pegar apenas o primeiro resultado agregado
 
-                            console.log('🔍 Using aggregated insight:', insight);
+                            console.log('📊 Using aggregated insight:', JSON.stringify(insight, null, 2));
 
                             const impressions = parseInt(insight.impressions) || 0;
                             const clicks = parseInt(insight.clicks) || 0;
                             const spend = parseFloat(insight.spend) || 0;
                             let conversions = 0;
+
+                            console.log(`📊 Parsed values - Impressions: ${impressions}, Clicks: ${clicks}, Spend: ${spend}`);
 
                             // Calculate conversions from actions
                             if (insight.actions) {

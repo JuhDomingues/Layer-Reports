@@ -514,10 +514,10 @@ class MetaAdsAPI {
         if (!this.accessToken) throw new Error('Access token não encontrado.');
 
         const params = {
-            fields: 'impressions,clicks,spend,ctr,cpc,cpm,reach,frequency,actions,action_values,conversions,cost_per_conversion',
-            access_token: this.accessToken,
-            level: 'campaign'
-            // NÃO usar time_increment - deixa a API agregar todo o período
+            fields: 'impressions,clicks,spend,reach,frequency,actions,conversions',
+            access_token: this.accessToken
+            // IMPORTANTE: NÃO usar level: 'campaign' em insights de campanha
+            // IMPORTANTE: NÃO usar time_increment para dados agregados
         };
 
         // Usar filtros de data específicos se fornecidos
@@ -533,15 +533,21 @@ class MetaAdsAPI {
             console.log(`[DEBUG] getRealInsights: Using date_preset last_30d`);
         }
 
-        console.log(`[DEBUG] getRealInsights: API params:`, params);
+        console.log(`[DEBUG] getRealInsights: Full API call URL:`, `/${objectId}/insights`);
+        console.log(`[DEBUG] getRealInsights: Full API params:`, JSON.stringify(params, null, 2));
 
         return new Promise((resolve, reject) => {
             FB.api(`/${objectId}/insights`, params, (response) => {
-                console.log(`[DEBUG] getRealInsights: /${objectId}/insights response:`, response);
+                console.log(`[DEBUG] ========================================`);
+                console.log(`[DEBUG] getRealInsights RESPONSE for ${objectId}:`);
+                console.log(`[DEBUG] Full response:`, JSON.stringify(response, null, 2));
+                console.log(`[DEBUG] ========================================`);
+
                 if (response.error) {
                     console.error('[DEBUG] getRealInsights: API Error', response.error);
                     reject(new Error(this.errorHandler.handleAPIError(response, 'getRealInsights')));
                 } else {
+                    console.log(`[DEBUG] Success! Returning ${response.data?.length || 0} insights`);
                     resolve({ data: response.data || [] });
                 }
             });
