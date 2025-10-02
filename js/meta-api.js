@@ -514,8 +514,10 @@ class MetaAdsAPI {
         if (!this.accessToken) throw new Error('Access token não encontrado.');
 
         const params = {
-            fields: 'impressions,clicks,spend,ctr,cpc,cpm,actions',
-            access_token: this.accessToken
+            fields: 'impressions,clicks,spend,ctr,cpc,cpm,reach,frequency,actions,action_values,conversions,cost_per_conversion',
+            access_token: this.accessToken,
+            level: 'campaign'
+            // NÃO usar time_increment - deixa a API agregar todo o período
         };
 
         // Usar filtros de data específicos se fornecidos
@@ -524,9 +526,11 @@ class MetaAdsAPI {
                 since: dateFilters.since,
                 until: dateFilters.until
             });
+            console.log(`[DEBUG] getRealInsights: Using time_range ${dateFilters.since} to ${dateFilters.until}`);
         } else {
             // Fallback para preset padrão
             params.date_preset = 'last_30d';
+            console.log(`[DEBUG] getRealInsights: Using date_preset last_30d`);
         }
 
         console.log(`[DEBUG] getRealInsights: API params:`, params);

@@ -2372,118 +2372,119 @@ class MetaAdsInsights {
 
     async convertRealDataToFormat(realCampaigns) {
         console.log('🔍 convertRealDataToFormat called with campaigns:', realCampaigns.length);
-        
+
         // Converter dados da API real para formato do dashboard
         const campaigns = [];
         let realInsightsCount = 0;
-        let mockInsightsCount = 0;
-        
-        // Limitar processamento para evitar travamento
-        const maxCampaigns = Math.min(realCampaigns.length, 20);
-        console.log(`🔍 Processing first ${maxCampaigns} campaigns to avoid timeout`);
-        
-        const campaignsToProcess = realCampaigns.slice(0, maxCampaigns);
-        
-        for (let i = 0; i < campaignsToProcess.length; i++) {
-            const campaign = campaignsToProcess[i];
-            const progress = Math.round(((i + 1) / campaignsToProcess.length) * 100);
-            
-            console.log(`🔍 Processing campaign ${i + 1}/${campaignsToProcess.length} (${progress}%):`, campaign.name, 'ID:', campaign.id);
-            
+
+        // REMOVER LIMITE - processar todas as campanhas
+        console.log(`🔍 Processing ALL ${realCampaigns.length} campaigns`);
+
+        for (let i = 0; i < realCampaigns.length; i++) {
+            const campaign = realCampaigns[i];
+            const progress = Math.round(((i + 1) / realCampaigns.length) * 100);
+
+            console.log(`🔍 Processing campaign ${i + 1}/${realCampaigns.length} (${progress}%):`, campaign.name, 'ID:', campaign.id);
+
             // Update loading message with progress
             if (window.metaAdsApp) {
-                window.metaAdsApp.showLoading(`Carregando métricas das campanhas... ${progress}% (${i + 1}/${campaignsToProcess.length})`);
+                window.metaAdsApp.showLoading(`Carregando métricas das campanhas... ${progress}% (${i + 1}/${realCampaigns.length})`);
             }
-            
+
             try {
                 // Try to get real insights, fallback to mock if error
                 let insights = null;
-                
+
                 if (this.api.mode === 'real') {
                     try {
                         console.log('🔍 Fetching insights for campaign:', campaign.id);
-                        
+
                         // Add timeout to prevent hanging - use date filters from current selection
                         const dateFilters = this.getDateFiltersForAPI();
                         const insightsPromise = this.api.getInsights(campaign.id, dateFilters);
-                        const timeoutPromise = new Promise((_, reject) => 
-                            setTimeout(() => reject(new Error('Timeout getting insights')), 10000)
+                        const timeoutPromise = new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Timeout getting insights')), 15000)
                         );
-                        
+
                         const insightsData = await Promise.race([insightsPromise, timeoutPromise]);
-                        console.log('🔍 Insights data received:', insightsData);
-                        
+                        console.log('🔍 Insights data received for', campaign.name, ':', insightsData);
+
                         if (insightsData.data && insightsData.data.length > 0) {
-                            // Use aggregated data from all insights or latest
-                            let totalImpressions = 0;
-                            let totalClicks = 0;
-                            let totalSpend = 0;
-                            let totalConversions = 0;
-                            
-                            // Sum up all insights for the period
-                            insightsData.data.forEach(insight => {
-                                totalImpressions += parseInt(insight.impressions) || 0;
-                                totalClicks += parseInt(insight.clicks) || 0;
-                                totalSpend += parseFloat(insight.spend) || 0;
-                                
-                                // Calculate conversions from actions - enhanced mapping
-                                if (insight.actions) {
-                                    insight.actions.forEach(action => {
-                                        // Map various Facebook conversion action types
-                                        if (action.action_type.includes('conversion') || 
-                                            action.action_type.includes('purchase') ||
-                                            action.action_type.includes('lead') ||
-                                            action.action_type.includes('complete_registration') ||
-                                            action.action_type.includes('submit_application') ||
-                                            action.action_type.includes('add_to_cart') ||
-                                            action.action_type.includes('initiate_checkout') ||
-                                            action.action_type === 'offsite_conversion.fb_pixel_purchase' ||
-                                            action.action_type === 'offsite_conversion.fb_pixel_lead' ||
-                                            action.action_type === 'offsite_conversion.custom') {
-                                            totalConversions += parseInt(action.value) || 0;
-                                        }
-                                    });
-                                }
-                                
-                                // Also check for direct conversion fields
-                                if (insight.conversions) {
-                                    totalConversions += parseInt(insight.conversions) || 0;
-                                }
-                                
-                                // Check for purchase_value and other conversion-related fields
-                                if (insight.purchase_value) {
-                                    // If there's purchase value but no conversions counted, estimate conversions
-                                    if (totalConversions === 0 && parseFloat(insight.purchase_value) > 0) {
-                                        totalConversions += 1; // At least one conversion if there's purchase value
+                            // A API do Meta Ads agora retorna dados JÁ AGREGADOS (sem time_increment)
+                            // Então devemos usar o PRIMEIRO (e único) resultado, NÃO somar
+                            const insight = insightsData.data[0]; // Pegar apenas o primeiro resultado agregado
+
+                            console.log('🔍 Using aggregated insight:', insight);
+
+                            const impressions = parseInt(insight.impressions) || 0;
+                            const clicks = parseInt(insight.clicks) || 0;
+                            const spend = parseFloat(insight.spend) || 0;
+                            let conversions = 0;
+
+                            // Calculate conversions from actions
+                            if (insight.actions) {
+                                insight.actions.forEach(action => {
+                                    // Map various Facebook conversion action types
+                                    if (action.action_type.includes('conversion') ||
+                                        action.action_type.includes('purchase') ||
+                                        action.action_type.includes('lead') ||
+                                        action.action_type.includes('complete_registration') ||
+                                        action.action_type.includes('submit_application') ||
+                                        action.action_type === 'offsite_conversion.fb_pixel_purchase' ||
+                                        action.action_type === 'offsite_conversion.fb_pixel_lead' ||
+                                        action.action_type === 'offsite_conversion.custom') {
+                                        conversions += parseInt(action.value) || 0;
                                     }
-                                }
-                            });
-                            
+                                });
+                            }
+
+                            // Also check for direct conversion fields
+                            if (insight.conversions && conversions === 0) {
+                                conversions = parseInt(insight.conversions) || 0;
+                            }
+
                             // Calculate derived metrics
-                            const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
-                            const cpc = totalClicks > 0 ? (totalSpend / totalClicks) : 0;
-                            
+                            const ctr = impressions > 0 ? (clicks / impressions * 100) : 0;
+                            const cpc = clicks > 0 ? (spend / clicks) : 0;
+
                             insights = {
-                                impressions: totalImpressions,
-                                clicks: totalClicks,
-                                spend: totalSpend,
+                                impressions: impressions,
+                                clicks: clicks,
+                                spend: spend,
                                 ctr: ctr.toFixed(2),
                                 cpc: cpc.toFixed(2),
-                                conversions: totalConversions
+                                conversions: conversions
                             };
-                            
+
                             realInsightsCount++;
                             console.log('🔍 Real insights processed for', campaign.name, ':', insights);
                         } else {
-                            console.log('🔍 No insights data found for campaign:', campaign.name);
+                            console.warn('🔍 No insights data found for campaign:', campaign.name);
+                            // Campanha sem dados - usar zeros
+                            insights = {
+                                impressions: 0,
+                                clicks: 0,
+                                spend: 0,
+                                ctr: '0.00',
+                                cpc: '0.00',
+                                conversions: 0
+                            };
                         }
                     } catch (insightError) {
-                        console.warn(`🔍 Could not get insights for campaign ${campaign.name}:`, insightError);
-                        insights = null; // Explicitly set to null to use mock data
+                        console.error(`🔍 Error getting insights for campaign ${campaign.name}:`, insightError);
+                        // Em caso de erro, usar zeros ao invés de mock
+                        insights = {
+                            impressions: 0,
+                            clicks: 0,
+                            spend: 0,
+                            ctr: '0.00',
+                            cpc: '0.00',
+                            conversions: 0
+                        };
                     }
                 }
-                
-                // Use insights if available, otherwise generate mock data
+
+                // Sempre adicionar a campanha com dados reais ou zeros
                 if (insights) {
                     const campaignData = {
                         name: campaign.name,
@@ -2493,49 +2494,38 @@ class MetaAdsInsights {
                         ctr: insights.ctr,
                         cpc: insights.cpc,
                         conversions: insights.conversions,
-                        spend: insights.spend.toFixed(2)
+                        spend: typeof insights.spend === 'number' ? insights.spend.toFixed(2) : insights.spend
                     };
                     campaigns.push(campaignData);
-                    console.log('🔍 Added campaign with real data:', campaign.name);
-                } else {
-                    // Generate mock data but still use real campaign info
-                    mockInsightsCount++;
-                    const campaignData = {
-                        name: campaign.name,
-                        status: campaign.status.toLowerCase(),
-                        impressions: Math.floor(Math.random() * 100000 + 10000),
-                        clicks: Math.floor(Math.random() * 5000 + 500),
-                        ctr: (Math.random() * 5 + 1).toFixed(2),
-                        cpc: (Math.random() * 2 + 0.5).toFixed(2),
-                        conversions: Math.floor(Math.random() * 200 + 10),
-                        spend: (Math.random() * 5000 + 500).toFixed(2)
-                    };
-                    campaigns.push(campaignData);
-                    console.log('🔍 Added campaign with mock data:', campaign.name);
+
+                    if (insights.impressions > 0) {
+                        realInsightsCount++;
+                        console.log('✅ Added campaign with real data:', campaign.name, campaignData);
+                    } else {
+                        console.log('⚠️ Added campaign with zero metrics:', campaign.name);
+                    }
                 }
-                
+
             } catch (error) {
-                console.error(`🔍 Error processing campaign ${campaign.name}:`, error);
-                mockInsightsCount++;
-                
-                // Add with mock data if there's an error
+                console.error(`❌ Error processing campaign ${campaign.name}:`, error);
+                // Em caso de erro crítico, adicionar com zeros
                 campaigns.push({
                     name: campaign.name,
                     status: campaign.status.toLowerCase(),
-                    impressions: Math.floor(Math.random() * 100000 + 10000),
-                    clicks: Math.floor(Math.random() * 5000 + 500),
-                    ctr: (Math.random() * 5 + 1).toFixed(2),
-                    cpc: (Math.random() * 2 + 0.5).toFixed(2),
-                    conversions: Math.floor(Math.random() * 200 + 10),
-                    spend: (Math.random() * 5000 + 500).toFixed(2)
+                    impressions: 0,
+                    clicks: 0,
+                    ctr: '0.00',
+                    cpc: '0.00',
+                    conversions: 0,
+                    spend: '0.00'
                 });
             }
         }
 
-        console.log('🔍 Data conversion completed:');
-        console.log('🔍 - Total campaigns:', campaigns.length);
-        console.log('🔍 - Real insights:', realInsightsCount);
-        console.log('🔍 - Mock insights:', mockInsightsCount);
+        console.log('✅ Data conversion completed:');
+        console.log('📊 - Total campaigns:', campaigns.length);
+        console.log('✅ - Campaigns with real data:', realInsightsCount);
+        console.log('⚠️ - Campaigns with zero metrics:', campaigns.length - realInsightsCount);
 
         // Gerar dados temporais baseados nos dados reais
         const timeSeriesData = this.generateTimeSeriesData(campaigns);
